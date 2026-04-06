@@ -15,7 +15,7 @@ namespace GamblersGrocery.Models.Entities
         [Required(ErrorMessage = "Category is required")][MaxLength(50)][Display(Name = "Category")]
         public string category { get; set; } = string.Empty;
         [Required][Range(0, 999999)][Display(Name = "Stock Quantity")]
-        public int stockQuantity { get; set; }
+        public int? stockQuantity { get; set; }
         public ICollection<StockLog> StockLogs { get; set; } = new List<StockLog>();
         public ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
     }
