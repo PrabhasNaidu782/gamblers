@@ -120,7 +120,7 @@
             </div>
             <div class="card-body border-top">
                 <label class="form-label">Payment Mode</label>
-                <form asp-action="CompleteSale" asp-controller="Pos" method="post">
+                <form asp-action="ProcessPayment" asp-controller="Pos" method="post">
                     <div class="row g-2 mb-3">
                         <div class="col-4">
                             <input type="radio" name="paymentMode" value="CASH" id="pCash" class="d-none" checked />
