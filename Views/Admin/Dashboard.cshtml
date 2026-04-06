@@ -1,0 +1,81 @@
+@model AdminDashboardViewModel
+@{ ViewData["Title"] = "Admin Dashboard"; }
+<div class="page-header"><h4>Admin Dashboard</h4><p>Overview of today's store activity</p></div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#dbeafe;color:#1d4ed8;"><i class="fas fa-rupee-sign"></i></div>
+            <div><div class="stat-value">Rs @Model.TodaySales.ToString("N2")</div><div class="stat-label">Today's Sales</div></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#dcfce7;color:#166534;"><i class="fas fa-receipt"></i></div>
+            <div><div class="stat-value">@Model.TodayTransactions</div><div class="stat-label">Transactions Today</div></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#fef9c3;color:#854d0e;"><i class="fas fa-box"></i></div>
+            <div><div class="stat-value">@Model.TotalProducts</div><div class="stat-label">Total Products</div></div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="stat-icon" style="background:#fee2e2;color:#991b1b;"><i class="fas fa-exclamation-triangle"></i></div>
+            <div><div class="stat-value">@Model.LowStockCount</div><div class="stat-label">Low Stock Items</div></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Recent Transactions</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>#</th><th>Cashier</th><th>Amount</th><th>Payment</th><th>Time</th></tr></thead>
+                    <tbody>
+                        @if (!Model.RecentTransactions.Any())
+                        { <tr><td colspan="5" class="text-center text-muted py-3">No transactions yet</td></tr> }
+                        @foreach (var t in Model.RecentTransactions)
+                        {
+                            <tr>
+                                <td>#@t.transactionId</td>
+                                <td>@t.cashierName</td>
+                                <td>Rs @t.finalAmount.ToString("N2")</td>
+                                <td><span class="badge badge-info">@t.paymentMode</span></td>
+                                <td>@t.transactionDate.ToString("hh:mm tt")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">Low Stock Products</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Product</th><th>Stock</th></tr></thead>
+                    <tbody>
+                        @if (!Model.LowStockProducts.Any())
+                        { <tr><td colspan="2" class="text-center text-muted py-3">All stock is sufficient</td></tr> }
+                        @foreach (var p in Model.LowStockProducts)
+                        {
+                            <tr>
+                                <td>@p.productName</td>
+                                <td>
+                                    @if (p.stockQuantity == 0) { <span class="stock-out">Out of Stock</span> }
+                                    else { <span class="stock-low">@p.stockQuantity units</span> }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

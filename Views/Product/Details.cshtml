@@ -1,0 +1,25 @@
+@model Product
+@{ ViewData["Title"] = "Product Details"; }
+<div class="page-header"><h4>Product Details</h4></div>
+<div class="row"><div class="col-lg-6">
+<div class="card">
+    <div class="card-header">@Model.productName</div>
+    <div class="card-body">
+        <table class="table table-borderless table-sm">
+            <tr><td class="text-muted" style="width:140px;">Product ID</td><td>@Model.productId</td></tr>
+            <tr><td class="text-muted">Barcode</td><td><code>@Model.barcode</code></td></tr>
+            <tr><td class="text-muted">Category</td><td>@Model.category</td></tr>
+            <tr><td class="text-muted">Price</td><td><strong>Rs @Model.price.ToString("N2")</strong></td></tr>
+            <tr><td class="text-muted">Stock</td><td>
+                @if (Model.stockQuantity == 0) { <span class="stock-out">Out of Stock</span> }
+                else if (Model.stockQuantity <= 5) { <span class="stock-low">@Model.stockQuantity units (Low)</span> }
+                else { <span class="stock-ok">@Model.stockQuantity units</span> }
+            </td></tr>
+        </table>
+        <div class="d-flex gap-2 mt-3">
+            <a asp-action="Edit" asp-route-id="@Model.productId" class="btn btn-primary">Edit</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </div>
+</div>
+</div></div>

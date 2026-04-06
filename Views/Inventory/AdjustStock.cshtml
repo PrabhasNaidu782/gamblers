@@ -1,0 +1,32 @@
+@model Product
+@{ ViewData["Title"] = "Adjust Stock"; }
+<div class="page-header"><h4>Adjust Stock</h4><p>Update quantity for <strong>@Model.productName</strong></p></div>
+<div class="row"><div class="col-lg-5">
+<div class="card">
+    <div class="card-header">Stock Adjustment</div>
+    <div class="card-body">
+        <table class="table table-borderless table-sm mb-4">
+            <tr><td class="text-muted" style="width:130px;">Product</td><td><strong>@Model.productName</strong></td></tr>
+            <tr><td class="text-muted">Barcode</td><td><code>@Model.barcode</code></td></tr>
+            <tr><td class="text-muted">Category</td><td>@Model.category</td></tr>
+            <tr><td class="text-muted">Current Stock</td><td>
+                @if (Model.stockQuantity == 0) { <span class="stock-out">Out of Stock</span> }
+                else if (Model.stockQuantity <= 5) { <span class="stock-low">@Model.stockQuantity units (Low)</span> }
+                else { <span class="stock-ok">@Model.stockQuantity units</span> }
+            </td></tr>
+        </table>
+        <form asp-action="AdjustStockPost" method="post">
+            <input type="hidden" name="productId" value="@Model.productId" />
+            <div class="mb-4">
+                <label class="form-label">New Stock Quantity</label>
+                <input type="number" name="newQuantity" class="form-control" value="@Model.stockQuantity" min="0" required />
+                <small class="text-muted">Enter the correct physical count</small>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Update Stock</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</div></div>

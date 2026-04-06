@@ -1,0 +1,44 @@
+@model Transaction
+@{ ViewData["Title"] = "Transaction Details"; }
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div><h4>Transaction #@Model.transactionId</h4><p>@Model.transactionDate.ToString("dd MMM yyyy, hh:mm tt")</p></div>
+    <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-plus me-2"></i>New Bill</a>
+</div>
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Items Purchased</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Product</th><th>Unit Price</th><th>Qty</th><th>Discount</th><th>Line Total</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in Model.TransactionItems)
+                        {
+                            <tr>
+                                <td>@item.Product?.productName</td>
+                                <td>Rs @item.unitPrice.ToString("N2")</td>
+                                <td>@item.quantity</td>
+                                <td>@if (item.productDiscount > 0) { <span class="text-success">-Rs @item.productDiscount.ToString("N2")</span> } else { <span class="text-muted">—</span> }</td>
+                                <td><strong>Rs @item.lineTotal.ToString("N2")</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Summary</div>
+            <div class="card-body">
+                <table class="table table-sm table-borderless">
+                    <tr><td class="text-muted">Cashier</td><td><strong>@Model.cashierName</strong></td></tr>
+                    <tr><td class="text-muted">Payment</td><td><span class="badge badge-info">@Model.paymentMode</span></td></tr>
+                    <tr><td class="text-muted">Total Before Discount</td><td>Rs @Model.totalAmount.ToString("N2")</td></tr>
+                    <tr><td class="text-muted">Total Discount</td><td class="text-success">-Rs @Model.discountAmount.ToString("N2")</td></tr>
+                    <tr class="border-top"><td><strong>Final Amount</strong></td><td><strong style="font-size:16px;">Rs @Model.finalAmount.ToString("N2")</strong></td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

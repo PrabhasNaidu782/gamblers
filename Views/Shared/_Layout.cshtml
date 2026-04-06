@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gamblers Grocery</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    @{
+        var isLoggedIn = !string.IsNullOrEmpty(Context.Session.GetString("SessionUserId"));
+        var sessionName = Context.Session.GetString("SessionUserName") ?? "";
+        var sessionRole = Context.Session.GetString("SessionUserRole") ?? "";
+        var currCtrl = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currAct = ViewContext.RouteData.Values["action"]?.ToString();
+    }
+
+    @if (isLoggedIn)
+    {
+        <div class="d-flex" style="min-height:100vh;">
+            <nav class="sidebar d-flex flex-column" id="sidebar">
+                <div class="sidebar-header">
+                    <i class="fas fa-store me-2"></i>
+                    <span>Gamblers Grocery</span>
+                </div>
+
+                <div class="sidebar-user">
+                    <div class="user-circle">@(sessionName.Length > 0 ? sessionName.Substring(0, 1).ToUpper() : "U")</div>
+                    <div class="user-info">
+                        <div class="user-name">@sessionName</div>
+                        <div class="user-role">@sessionRole</div>
+                    </div>
+                </div>
+
+                <ul class="nav d-flex flex-column flex-nowrap w-100 sidebar-nav flex-grow-1">
+                    <li class="nav-section-label w-100">MAIN</li>
+                    <li class="nav-item w-100">
+                        <a asp-controller="Home" asp-action="Index"
+                               class="nav-link @(currCtrl == "Home" && currAct == "Index" ? "active" : "")">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+
+                    @if (sessionRole == "Admin")
+                    {
+                        <li class="nav-item w-100">
+                            <a asp-controller="Admin" asp-action="Dashboard"
+                                   class="nav-link @(currCtrl == "Admin" && currAct == "Dashboard" ? "active" : "")">
+                                <i class="fas fa-tachometer-alt"></i> Dashboard
+                            </a>
+                        </li>
+                    }
+
+                    @if (sessionRole == "Admin" || sessionRole == "Cashier")
+                    {
+                        <li class="nav-section-label w-100">POS</li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Pos" asp-action="Index"
+                                   class="nav-link @(currCtrl == "Pos" && currAct == "Index" ? "active" : "")">
+                                <i class="fas fa-cash-register"></i> Billing
+                            </a>
+                        </li>
+                    }
+
+                    @if (sessionRole == "Admin" || sessionRole == "Store Manager")
+                    {
+                        <li class="nav-section-label w-100">CATALOG</li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Product" asp-action="Index"
+                                   class="nav-link @(currCtrl == "Product" && currAct == "Index" ? "active" : "")">
+                                <i class="fas fa-box"></i> Products
+                            </a>
+                        </li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Promotion" asp-action="Index"
+                                   class="nav-link @(currCtrl == "Promotion" && currAct == "Index" ? "active" : "")">
+                                <i class="fas fa-tag"></i> Promotions
+                            </a>
+                        </li>
+                    }
+
+                    @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                    {
+                        <li class="nav-section-label w-100">INVENTORY</li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Inventory" asp-action="Index"
+                                   class="nav-link @(currCtrl == "Inventory" && currAct == "Index" ? "active" : "")">
+                                <i class="fas fa-warehouse"></i> Stock Levels
+                            </a>
+                        </li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Inventory" asp-action="StockLogs"
+                                   class="nav-link @(currCtrl == "Inventory" && currAct == "StockLogs" ? "active" : "")">
+                                <i class="fas fa-history"></i> Stock Logs
+                            </a>
+                        </li>
+                    }
+
+                    @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Cashier")
+                    {
+                        <li class="nav-section-label w-100">REPORTS</li>
+                        @if (sessionRole == "Admin" || sessionRole == "Store Manager")
+                        {
+                            <li class="nav-item w-100">
+                                <a asp-controller="Report" asp-action="GenerateDailySalesReport"
+                                       class="nav-link @(currCtrl == "Report" && currAct == "GenerateDailySalesReport" ? "active" : "")">
+                                    <i class="fas fa-chart-bar"></i> Sales Report
+                                </a>
+                            </li>
+                            <li class="nav-item w-100">
+                                <a asp-controller="Report" asp-action="Index"
+                                       class="nav-link @(currCtrl == "Report" && currAct == "Index" ? "active" : "")">
+                                    <i class="fas fa-file-invoice"></i> Settlements
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item w-100">
+                            <a asp-controller="Report" asp-action="CloseDay"
+                                   class="nav-link @(currCtrl == "Report" && currAct == "CloseDay" ? "active" : "")">
+                                <i class="fas fa-moon"></i> Close Day
+                            </a>
+                        </li>
+                    }
+
+                    @if (sessionRole == "Admin")
+                    {
+                        <li class="nav-section-label w-100">ADMIN</li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Admin" asp-action="ManageUsers"
+                                   class="nav-link @(currCtrl == "Admin" && currAct == "ManageUsers" ? "active" : "")">
+                                <i class="fas fa-users"></i> Manage Users
+                            </a>
+                        </li>
+                        <li class="nav-item w-100">
+                            <a asp-controller="Product" asp-action="ListAllProducts"
+                                   class="nav-link @(currCtrl == "Product" && currAct == "ListAllProducts" ? "active" : "")">
+                                <i class="fas fa-list"></i> All Products
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+                <div class="sidebar-footer">
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        <button type="submit" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </form>
+                </div>
+            </nav>
+
+            <div class="main-content">
+                <div class="topbar">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <span class="topbar-title">@(ViewData["Title"] ?? "Dashboard")</span>
+                </div>
+                <div class="content-area">
+                    @RenderBody()
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @RenderBody()
+    }
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+        document.querySelector('.main-content').classList.toggle('expanded');
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) {
+        // Restore scroll
+        const savedScroll = localStorage.getItem('sidebarScrollPosition');
+        if (savedScroll) { sidebar.scrollTop = savedScroll; }
+
+        // Save scroll on click
+        sidebar.addEventListener('click', function(e) {
+        if (e.target.closest('.nav-link')) {
+        localStorage.setItem('sidebarScrollPosition', sidebar.scrollTop);
+        }
+        });
+
+        // Auto-scroll active into center
+        const activeLink = sidebar.querySelector('.nav-link.active');
+        if (activeLink) {
+        activeLink.scrollIntoView({ behavior: 'auto', block: 'center' });
+        }
+        }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

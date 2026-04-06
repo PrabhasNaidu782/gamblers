@@ -1,0 +1,29 @@
+@model IEnumerable<StockLog>
+@{ ViewData["Title"] = "Stock Logs"; }
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div><h4>Stock Logs</h4><p>All stock change history</p></div>
+    <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back to Stock</a>
+</div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead><tr><th>#</th><th>Product</th><th>Change</th><th>Type</th><th>Timestamp</th></tr></thead>
+            <tbody>
+                @if (!Model.Any()) { <tr><td colspan="5" class="text-center text-muted py-3">No stock logs yet.</td></tr> }
+                @foreach (var log in Model)
+                {
+                    <tr>
+                        <td>@log.logId</td>
+                        <td>@log.Product?.productName</td>
+                        <td>
+                            @if (log.quantityChanged > 0) { <span class="text-success">+@log.quantityChanged</span> }
+                            else { <span class="text-danger">@log.quantityChanged</span> }
+                        </td>
+                        <td><span class="badge badge-info">@log.changeType</span></td>
+                        <td>@log.timestamp.ToString("dd MMM yyyy hh:mm tt")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

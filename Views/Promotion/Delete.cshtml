@@ -1,0 +1,22 @@
+@model Promotion
+@{ ViewData["Title"] = "Delete Promotion"; }
+<div class="page-header"><h4>Delete Promotion</h4></div>
+<div class="row"><div class="col-lg-5">
+<div class="card border-danger">
+    <div class="card-header text-danger">Confirm Deletion</div>
+    <div class="card-body">
+        <p>Delete promotion for <strong>@Model.Product?.productName</strong>?</p>
+        <table class="table table-sm table-borderless">
+            <tr><td class="text-muted">Discount</td><td>@Model.discountPercent%</td></tr>
+            <tr><td class="text-muted">Period</td><td>@Model.startDate.ToString("dd MMM") – @Model.endDate.ToString("dd MMM yyyy")</td></tr>
+        </table>
+        <form asp-action="DeleteConfirmed" method="post">
+            <input type="hidden" name="promotionId" value="@Model.promotionId" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</div></div>

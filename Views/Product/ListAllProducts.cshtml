@@ -1,0 +1,26 @@
+@model IEnumerable<Product>
+@{ ViewData["Title"] = "All Products"; }
+<div class="page-header"><h4>All Products</h4><p>Complete product listing</p></div>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead><tr><th>Product Name</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th></tr></thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.productName</td>
+                        <td><code>@p.barcode</code></td>
+                        <td>@p.category</td>
+                        <td>Rs @p.price.ToString("N2")</td>
+                        <td>
+                            @if (p.stockQuantity == 0) { <span class="stock-out">Out of Stock</span> }
+                            else if (p.stockQuantity <= 5) { <span class="stock-low">@p.stockQuantity</span> }
+                            else { <span class="stock-ok">@p.stockQuantity</span> }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

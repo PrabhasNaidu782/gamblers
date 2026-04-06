@@ -1,0 +1,50 @@
+@model Product
+@{ ViewData["Title"] = "Edit Product"; }
+<div class="page-header"><h4>Edit Product</h4><p>Update product information</p></div>
+<div class="row"><div class="col-lg-7">
+<div class="card">
+    <div class="card-header">Product Details</div>
+    <div class="card-body">
+        <form asp-action="UpdateProduct" method="post">
+            <input asp-for="productId" type="hidden" />
+            <div class="row g-3 mb-3">
+                <div class="col-md-8">
+                    <label asp-for="productName" class="form-label"></label>
+                    <input asp-for="productName" class="form-control" />
+                    <span asp-validation-for="productName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="barcode" class="form-label"></label>
+                    <input asp-for="barcode" class="form-control" />
+                    <span asp-validation-for="barcode" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label asp-for="price" class="form-label"></label>
+                    <div class="input-group"><span class="input-group-text">Rs</span>
+                    <input asp-for="price" class="form-control" /></div>
+                    <span asp-validation-for="price" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="stockQuantity" class="form-label"></label>
+                    <input asp-for="stockQuantity" class="form-control" />
+                    <span asp-validation-for="stockQuantity" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="category" class="form-label"></label>
+                    <select asp-for="category" class="form-select" asp-items="ViewBag.Categories">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="category" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary">Update Product</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</div></div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

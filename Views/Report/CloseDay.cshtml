@@ -1,0 +1,30 @@
+@model CloseDayViewModel
+@{ ViewData["Title"] = "Close Day"; }
+<div class="page-header"><h4>Close Day</h4><p>Submit today's cash settlement</p></div>
+<div class="row"><div class="col-lg-5">
+<div class="card">
+    <div class="card-header">Settlement for @Model.date.ToString("dd MMMM yyyy")</div>
+    <div class="card-body">
+        <div class="alert alert-info mb-4">
+            <strong>System Total:</strong> Rs @Model.systemTotal.ToString("N2")
+        </div>
+        <form asp-action="CloseDayPost" method="post">
+            <input type="hidden" name="date" value="@Model.date.ToString("yyyy-MM-dd")" />
+            <input type="hidden" name="cashierName" value="@Model.cashierName" />
+            <div class="mb-4">
+                <label asp-for="cashInHand" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text">Rs</span>
+                    <input asp-for="cashInHand" class="form-control" placeholder="0.00" />
+                </div>
+                <span asp-validation-for="cashInHand" class="text-danger small"></span>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Submit Settlement</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</div></div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

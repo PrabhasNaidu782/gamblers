@@ -1,0 +1,45 @@
+@model Promotion
+@{ ViewData["Title"] = "Edit Promotion"; }
+<div class="page-header"><h4>Edit Promotion</h4></div>
+<div class="row"><div class="col-lg-6">
+<div class="card">
+    <div class="card-header">Promotion Details</div>
+    <div class="card-body">
+        <form asp-action="UpdatePromotion" method="post">
+            <input asp-for="promotionId" type="hidden" />
+            <div class="mb-3">
+                <label asp-for="productId" class="form-label"></label>
+                <select asp-for="productId" class="form-select" asp-items="ViewBag.Products">
+                    <option value="">-- Select Product --</option>
+                </select>
+                <span asp-validation-for="productId" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="discountPercent" class="form-label"></label>
+                <div class="input-group">
+                    <input asp-for="discountPercent" class="form-control" />
+                    <span class="input-group-text">%</span>
+                </div>
+                <span asp-validation-for="discountPercent" class="text-danger small"></span>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <label asp-for="startDate" class="form-label"></label>
+                    <input asp-for="startDate" class="form-control" type="date" />
+                    <span asp-validation-for="startDate" class="text-danger small"></span>
+                </div>
+                <div class="col-6">
+                    <label asp-for="endDate" class="form-label"></label>
+                    <input asp-for="endDate" class="form-control" type="date" />
+                    <span asp-validation-for="endDate" class="text-danger small"></span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Update Promotion</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</div></div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

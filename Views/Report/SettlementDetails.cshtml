@@ -1,0 +1,24 @@
+@model Settlement
+@{ ViewData["Title"] = "Settlement Details"; }
+<div class="page-header"><h4>Settlement #@Model.settlementId</h4><p>@Model.settlementDate.ToString("dd MMMM yyyy")</p></div>
+<div class="row"><div class="col-lg-5">
+<div class="card">
+    <div class="card-header">Settlement Summary</div>
+    <div class="card-body">
+        <table class="table table-borderless table-sm">
+            <tr><td class="text-muted">Cashier</td><td><strong>@Model.cashierName</strong></td></tr>
+            <tr><td class="text-muted">Date</td><td>@Model.settlementDate.ToString("dd MMM yyyy")</td></tr>
+            <tr><td class="text-muted">System Total</td><td>Rs @Model.totalSales.ToString("N2")</td></tr>
+            <tr><td class="text-muted">Cash In Hand</td><td>Rs @Model.cashInHand.ToString("N2")</td></tr>
+            <tr class="border-top">
+                <td><strong>Variance</strong></td>
+                <td>
+                    @if (Model.variance >= 0) { <strong class="text-success">+Rs @Model.variance.ToString("N2")</strong> }
+                    else { <strong class="text-danger">Rs @Model.variance.ToString("N2")</strong> }
+                </td>
+            </tr>
+        </table>
+        <a asp-action="Index" class="btn btn-outline-secondary mt-2">Back to Settlements</a>
+    </div>
+</div>
+</div></div>
