@@ -20,6 +20,7 @@ namespace GamblersGrocery.Controllers
         public IActionResult Login(string? returnUrl = null)
         {
             // Already logged in - redirect
+            //git changes
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToHome();
             ViewData["ReturnUrl"] = returnUrl;
