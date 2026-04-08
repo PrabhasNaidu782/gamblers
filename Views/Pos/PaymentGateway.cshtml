@@ -32,8 +32,17 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Enter UPI ID</label>
-                                    <input type="text" name="upiId" class="form-control form-control-lg text-center" 
-                                           placeholder="username@bankid" required autofocus autocomplete="off" />
+                                    <input type="text" 
+                                           id="upiId"
+                                           name="upiId" 
+                                           class="form-control form-control-lg text-center" 
+                                           placeholder="username@bankid" 
+                                           required 
+                                           autofocus 
+                                           autocomplete="off" />
+                                    <div id="upiError" class="text-danger small mt-2 text-center" style="display:none;">
+                                        <i class="fas fa-exclamation-circle me-1"></i> Invalid UPI ID format.
+                                    </div>
                                     <div class="form-text text-center mt-2">
                                         Scan the QR on the customer's app or enter ID manually.
                                     </div>
@@ -50,21 +59,40 @@
                                     <label class="form-label fw-bold">Cardholder Name</label>
                                     <input type="text" class="form-control" placeholder="AS PRINTED ON CARD" required />
                                 </div>
-                                <div class="mb-3">
+                                <div class="col-12 mb-3">
                                     <label class="form-label fw-bold">Card Number</label>
                                     <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        <input type="text" class="form-control" placeholder="0000 0000 0000 0000" maxlength="12" required />
+                                        <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                        <input type="text" 
+                                               id="cardNumber" 
+                                               class="form-control" 
+                                               placeholder="0000 0000 0000 0000" 
+                                               maxlength="19" 
+                                               autocomplete="off" 
+                                               required />
+                                    </div>
+                                    <div id="cardError" class="text-danger small mt-1" style="display:none;">
+                                        Please enter a valid 16-digit card number.
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-6">
                                         <label class="form-label fw-bold">Expiry Date</label>
-                                        <input type="text" class="form-control" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/([0-9]{2})" maxlength="5" required />
+                                        <input type="text" 
+                                               id="expiryDate"
+                                               class="form-control" 
+                                               placeholder="MM/YY" 
+                                               pattern="(0[1-9]|1[0-2])\/([0-9]{2})" 
+                                               maxlength="5" 
+                                               autocomplete="one-time-code"
+                                               required />
+                                        <div id="expiryError" class="text-danger small mt-1" style="display:none;">
+                                            Card has expired.
+                                        </div>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label fw-bold">CVV</label>
-                                        <input type="password" class="form-control" placeholder="***" maxlength="3" required />
+                                        <input type="password" class="form-control" pattern = "([0-9]+)" placeholder="***" maxlength="3" autocomplete="one-time-code" required />
                                     </div>
                                 </div>
                             </div>
@@ -99,3 +127,95 @@
     .form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
     .btn-lg { border-radius: 10px; }
 </style>
+@* Ensure this is OUTSIDE of any @{ } C# blocks *@
+<script type="text/javascript">
+    // Using a self-invoking function to isolate scope and prevent Razor confusion
+    (function() {
+        
+        // --- 1. EXPIRY DATE VALIDATION ---
+        const expiryInput = document.getElementById('expiryDate');
+        if (expiryInput) {
+            expiryInput.addEventListener('input', function (e) {
+                let input = e.target.value;
+                const errorDisplay = document.getElementById('expiryError');
+
+                if (input.length === 2 && !input.includes('/') && e.inputType !== 'deleteContentBackward') {
+                    e.target.value = input + '/';
+                    input = e.target.value;
+                }
+
+                if (input.length === 5) {
+                    const parts = input.split('/');
+                    const month = parseInt(parts[0], 10);
+                    const year = parseInt("20" + parts[1], 10);
+                    const now = new Date();
+                    const currentMonth = now.getMonth() + 1;
+                    const currentYear = now.getFullYear();
+
+                    const isExpired = year < currentYear || (year === currentYear && month < currentMonth);
+
+                    if (isExpired) {
+                        errorDisplay.style.display = 'block';
+                        this.classList.add('is-invalid');
+                        this.setCustomValidity("The card has expired.");
+                    } else {
+                        errorDisplay.style.display = 'none';
+                        this.classList.remove('is-invalid');
+                        this.setCustomValidity("");
+                    }
+                }
+            });
+        }
+
+        // --- 2. CARD NUMBER VALIDATION ---
+        const cardInput = document.getElementById('cardNumber');
+        if (cardInput) {
+            cardInput.addEventListener('input', function (e) {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 16) value = value.slice(0, 16);
+                
+                // The [ character here sometimes confuses Razor if not handled right
+                let parts = value.match(/.{1,4}/g);
+                let formattedValue = parts ? parts.join(' ') : '';
+                this.value = formattedValue;
+
+                const errorDisplay = document.getElementById('cardError');
+                if (value.length > 0 && value.length < 16) {
+                    errorDisplay.style.display = 'block';
+                    this.classList.add('is-invalid');
+                    this.setCustomValidity("Incomplete card number.");
+                } else {
+                    errorDisplay.style.display = 'none';
+                    this.classList.remove('is-invalid');
+                    this.setCustomValidity("");
+                }
+            });
+        }
+
+        // --- 3. UPI ID VALIDATION ---
+        const upiInput = document.getElementById('upiId');
+        if (upiInput) {
+            upiInput.addEventListener('input', function (e) {
+                const upiValue = this.value.trim();
+                const errorDisplay = document.getElementById('upiError');
+                const upiRegex = /^[\w.-]+@@[\w.-]+$/; // Note: Double @@ for Razor
+
+                if (upiValue === "") {
+                    errorDisplay.style.display = 'none';
+                    this.classList.remove('is-invalid');
+                    return;
+                }
+
+                if (!upiRegex.test(upiValue)) {
+                    errorDisplay.style.display = 'block';
+                    this.classList.add('is-invalid');
+                    this.setCustomValidity("Invalid UPI format.");
+                } else {
+                    errorDisplay.style.display = 'none';
+                    this.classList.remove('is-invalid');
+                    this.setCustomValidity("");
+                }
+            });
+        }
+    })();
+</script>
