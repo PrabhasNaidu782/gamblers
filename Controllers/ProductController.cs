@@ -69,5 +69,6 @@ namespace GamblersGrocery.Controllers
             try { return View(await _productService.GetAllProductsAsync()); }
             catch (Exception ex) { _logger.LogError(ex, "ListAll failed"); return View(Enumerable.Empty<Product>()); }
         }
+
     }
 }

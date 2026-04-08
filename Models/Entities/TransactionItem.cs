@@ -11,7 +11,7 @@ namespace GamblersGrocery.Models.Entities
         public int productId { get; set; }
         [ForeignKey("productId")] public Product? Product { get; set; }
         public int quantity { get; set; }
-        [Column(TypeName = "decimal(10,2)")] public decimal unitPrice { get; set; }
+        [Column(TypeName = "decimal(10,2)")] public decimal? unitPrice { get; set; }
         [Column(TypeName = "decimal(10,2)")] public decimal productDiscount { get; set; }
         [Column(TypeName = "decimal(10,2)")] public decimal lineTotal { get; set; }
     }

@@ -14,10 +14,19 @@ namespace GamblersGrocery.Services.Implementations
         private readonly ILogger<PosService> _logger;
 
         public PosService(IProductRepository productRepo, ITransactionRepository txRepo, IInventoryRepository inventoryRepo, IPromotionRepository promoRepo, ILogger<PosService> logger)
-        { _productRepo = productRepo; _txRepo = txRepo; _inventoryRepo = inventoryRepo; _promoRepo = promoRepo; _logger = logger; }
+        {
+            _productRepo = productRepo;
+            _txRepo = txRepo;
+            _inventoryRepo = inventoryRepo;
+            _promoRepo = promoRepo;
+            _logger = logger;
+        }
 
         public async Task<Product?> ScanProductAsync(string barcode)
-        { try { return await _productRepo.GetProductByBarcodeAsync(barcode); } catch (Exception ex) { _logger.LogError(ex, "PosService Scan failed"); throw; } }
+        {
+            try { return await _productRepo.GetProductByBarcodeAsync(barcode); }
+            catch (Exception ex) { _logger.LogError(ex, "PosService Scan failed"); throw; }
+        }
 
         public async Task<BillViewModel> ApplyDiscountAsync(BillViewModel bill, decimal extraDiscountPercent)
         {
@@ -28,8 +37,9 @@ namespace GamblersGrocery.Services.Implementations
                 {
                     var promo = await _promoRepo.GetActivePromotionForProductAsync(item.productId);
                     item.discountPercent = promo?.discountPercent ?? 0;
-                    item.productDiscount = Math.Round(item.unitPrice * item.quantity * item.discountPercent / 100, 2);
-                    item.lineTotal = Math.Round((item.unitPrice * item.quantity) - item.productDiscount, 2);
+                    item.productDiscount = Math.Round((item.unitPrice ?? 0) * item.quantity * item.discountPercent / 100, 2);
+
+                    item.lineTotal = Math.Round(((item.unitPrice ?? 0) * item.quantity) - item.productDiscount, 2);
                     sub += item.lineTotal;
                 }
                 bill.subTotal = sub;
@@ -41,23 +51,36 @@ namespace GamblersGrocery.Services.Implementations
             catch (Exception ex) { _logger.LogError(ex, "PosService ApplyDiscount failed"); throw; }
         }
 
-        public async Task<Transaction> CompleteSaleAsync(BillViewModel bill, int cashierId, string cashierName, string paymentMode)
+        public async Task<Transaction> CompleteSaleAsync(BillViewModel bill, int cashierId, string cashierName, string paymentMode, string? upiId)
         {
             try
             {
                 var tx = new Transaction
                 {
-                    cashierId = cashierId, cashierName = cashierName,
-                    totalAmount = bill.subTotal + bill.Items.Sum(i => i.productDiscount),
+                    cashierId = cashierId,
+                    cashierName = cashierName,
+                    totalAmount = bill.subTotal + bill.billDiscountAmount, // Total before extra bill discount
                     discountAmount = bill.billDiscountAmount + bill.Items.Sum(i => i.productDiscount),
                     finalAmount = bill.totalAmount,
-                    paymentMode = paymentMode, transactionDate = DateTime.Now
+                    upiId = upiId,
+                    paymentMode = paymentMode,
+                    transactionDate = DateTime.Now
                 };
+
                 foreach (var item in bill.Items)
                 {
-                    tx.TransactionItems.Add(new TransactionItem { productId = item.productId, quantity = item.quantity, unitPrice = item.unitPrice, productDiscount = item.productDiscount, lineTotal = item.lineTotal });
+                    tx.TransactionItems.Add(new TransactionItem
+                    {
+                        productId = item.productId,
+                        quantity = item.quantity,
+                        unitPrice = item.unitPrice,
+                        productDiscount = item.productDiscount,
+                        lineTotal = item.lineTotal
+                    });
+
                     await _inventoryRepo.UpdateStockAsync(item.productId, -item.quantity, "SALE_UPDATE");
                 }
+
                 await _txRepo.AddTransactionAsync(tx);
                 return tx;
             }
@@ -65,6 +88,24 @@ namespace GamblersGrocery.Services.Implementations
         }
 
         public async Task<Transaction?> GetTransactionDetailsAsync(int id)
-        { try { return await _txRepo.GetTransactionByIdAsync(id); } catch (Exception ex) { _logger.LogError(ex, "PosService GetTxDetails failed"); throw; } }
+        {
+            try { return await _txRepo.GetTransactionByIdAsync(id); }
+            catch (Exception ex) { _logger.LogError(ex, "PosService GetTxDetails failed"); throw; }
+        }
+
+        // --- ADD THIS METHOD TO FIX THE CONTROLLER ERROR ---
+        public async Task<IEnumerable<Product>> GetCurrentStockLevelsAsync()
+        {
+            try
+            {
+                // This retrieves all products from the database for the search tool
+                return await _productRepo.GetAllProductsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "PosService GetCurrentStockLevels failed");
+                return Enumerable.Empty<Product>();
+            }
+        }
     }
 }

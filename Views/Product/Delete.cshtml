@@ -9,7 +9,7 @@
         <table class="table table-sm table-borderless">
             <tr><td class="text-muted">Barcode</td><td>@Model.barcode</td></tr>
             <tr><td class="text-muted">Category</td><td>@Model.category</td></tr>
-            <tr><td class="text-muted">Price</td><td>Rs @Model.price.ToString("N2")</td></tr>
+            <tr><td class="text-muted">Price</td><td>Rs @Model.price?.ToString("N2")</td></tr>
         </table>
         <p class="text-danger small"><i class="fas fa-exclamation-triangle me-1"></i>This action cannot be undone.</p>
         <form asp-action="DeleteConfirmed" method="post">

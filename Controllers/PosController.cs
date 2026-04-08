@@ -21,36 +21,76 @@ namespace GamblersGrocery.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index() => View("Billing", GetBill());
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                // Fetch all products to populate the search dropdown in the View
+                ViewBag.AllProducts = await _posService.GetCurrentStockLevelsAsync();
+                return View("Billing", GetBill());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load Billing index");
+                return View("Billing", new BillViewModel());
+            }
+        }
 
         [HttpPost]
         public async Task<IActionResult> ScanProduct(string barcode)
         {
-            if (string.IsNullOrWhiteSpace(barcode)) { TempData["Error"] = "Please enter a barcode."; return RedirectToAction(nameof(Index)); }
+            if (string.IsNullOrWhiteSpace(barcode))
+            {
+                TempData["Error"] = "Please enter a barcode.";
+                return RedirectToAction(nameof(Index));
+            }
+
             try
             {
                 var product = await _posService.ScanProductAsync(barcode.Trim());
-                if (product == null) { TempData["Error"] = $"No product found: {barcode}"; return RedirectToAction(nameof(Index)); }
-                if (product.stockQuantity <= 0) { TempData["Error"] = $"'{product.productName}' is out of stock."; return RedirectToAction(nameof(Index)); }
+                if (product == null)
+                {
+                    TempData["Error"] = $"No product found: {barcode}";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (product.stockQuantity <= 0)
+                {
+                    TempData["Error"] = $"'{product.productName}' is out of stock.";
+                    return RedirectToAction(nameof(Index));
+                }
 
                 var bill = GetBill();
                 var existing = bill.Items.FirstOrDefault(i => i.productId == product.productId);
-                if (existing != null) existing.quantity++;
-                else bill.Items.Add(new BillItemViewModel
+
+                if (existing != null)
                 {
-                    productId = product.productId,
-                    productName = product.productName,
-                    barcode = product.barcode,
-                    unitPrice = product.price,
-                    quantity = 1
-                });
+                    existing.quantity++;
+                }
+                else
+                {
+                    bill.Items.Add(new BillItemViewModel
+                    {
+                        productId = product.productId,
+                        productName = product.productName,
+                        barcode = product.barcode,
+                        unitPrice = product.price,
+                        quantity = 1
+                    });
+                }
 
                 bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
                 SaveBill(bill);
+
                 TempData["Success"] = $"'{product.productName}' added.";
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex) { _logger.LogError(ex, "ScanProduct failed"); TempData["Error"] = "An error occurred."; return RedirectToAction(nameof(Index)); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ScanProduct failed");
+                TempData["Error"] = "An error occurred while scanning.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
@@ -63,7 +103,12 @@ namespace GamblersGrocery.Controllers
                 SaveBill(bill);
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex) { _logger.LogError(ex, "ApplyDiscount failed"); TempData["Error"] = "Could not apply discount."; return RedirectToAction(nameof(Index)); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ApplyDiscount failed");
+                TempData["Error"] = "Could not apply discount.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
@@ -78,11 +123,11 @@ namespace GamblersGrocery.Controllers
 
             if (paymentMode == "CASH")
             {
-                // FIX: Instead of Redirecting (which is a GET), call the POST method logic directly
+                // Internal call to CompleteSale logic directly to maintain POST context
                 return await CompleteSale(paymentMode, null);
             }
 
-            // For CARD or UPI, redirect to the Gateway page (GET)
+            // For CARD or UPI, redirect to the Gateway page
             return RedirectToAction(nameof(PaymentGateway), new { mode = paymentMode });
         }
 
@@ -96,12 +141,15 @@ namespace GamblersGrocery.Controllers
             return View("PaymentGateway", bill);
         }
 
-        // FIX: Consolidated into ONE method to avoid AmbiguousMatchException
         [HttpPost]
         public async Task<IActionResult> CompleteSale(string paymentMode, string? upiId)
         {
             var bill = GetBill();
-            if (!bill.Items.Any()) { TempData["Error"] = "Bill is empty."; return RedirectToAction(nameof(Index)); }
+            if (!bill.Items.Any())
+            {
+                TempData["Error"] = "Bill is empty.";
+                return RedirectToAction(nameof(Index));
+            }
 
             try
             {
@@ -111,7 +159,9 @@ namespace GamblersGrocery.Controllers
                 bill.paymentMode = paymentMode;
                 bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
 
-                var tx = await _posService.CompleteSaleAsync(bill, cashierId, cashierName, paymentMode);
+                var tx = await _posService.CompleteSaleAsync(bill, cashierId, cashierName, paymentMode, upiId);
+
+                // Clear the current bill from session after successful save
                 HttpContext.Session.Remove(BillKey);
 
                 TempData["Success"] = $"Sale completed via {paymentMode}! Bill #{tx.transactionId}";
@@ -134,13 +184,29 @@ namespace GamblersGrocery.Controllers
                 if (tx == null) return NotFound();
                 return View("TransactionDetails", tx);
             }
-            catch (Exception ex) { _logger.LogError(ex, "GetTransactionDetails failed"); TempData["Error"] = "Could not load transaction."; return RedirectToAction(nameof(Index)); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetTransactionDetails failed");
+                TempData["Error"] = "Could not load transaction.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public async Task<IActionResult> RemoveItem(int productId)
         {
-            try { var bill = GetBill(); bill.Items.RemoveAll(i => i.productId == productId); bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent); SaveBill(bill); return RedirectToAction(nameof(Index)); }
-            catch (Exception ex) { _logger.LogError(ex, "RemoveItem failed"); return RedirectToAction(nameof(Index)); }
+            try
+            {
+                var bill = GetBill();
+                bill.Items.RemoveAll(i => i.productId == productId);
+                bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
+                SaveBill(bill);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "RemoveItem failed");
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [HttpPost]
@@ -150,12 +216,20 @@ namespace GamblersGrocery.Controllers
             {
                 var bill = GetBill();
                 var item = bill.Items.FirstOrDefault(i => i.productId == productId);
-                if (item != null) { if (quantity <= 0) bill.Items.Remove(item); else item.quantity = quantity; }
+                if (item != null)
+                {
+                    if (quantity <= 0) bill.Items.Remove(item);
+                    else item.quantity = quantity;
+                }
                 bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
                 SaveBill(bill);
                 return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex) { _logger.LogError(ex, "UpdateQty failed"); return RedirectToAction(nameof(Index)); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateQty failed");
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         public IActionResult ClearBill()
@@ -169,8 +243,14 @@ namespace GamblersGrocery.Controllers
         {
             var json = HttpContext.Session.GetString(BillKey);
             if (string.IsNullOrEmpty(json)) return new BillViewModel();
-            try { return JsonSerializer.Deserialize<BillViewModel>(json) ?? new BillViewModel(); }
-            catch { return new BillViewModel(); }
+            try
+            {
+                return JsonSerializer.Deserialize<BillViewModel>(json) ?? new BillViewModel();
+            }
+            catch
+            {
+                return new BillViewModel();
+            }
         }
 
         private void SaveBill(BillViewModel bill)
