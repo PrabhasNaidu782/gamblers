@@ -20,6 +20,7 @@ namespace GamblersGrocery.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index() => View("Billing", GetBill());
 
         [HttpPost]
@@ -66,13 +67,44 @@ namespace GamblersGrocery.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CompleteSale(string paymentMode)
+        public async Task<IActionResult> ProcessPayment(string paymentMode)
+        {
+            var bill = GetBill();
+            if (!bill.Items.Any())
+            {
+                TempData["Error"] = "Bill is empty.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (paymentMode == "CASH")
+            {
+                // FIX: Instead of Redirecting (which is a GET), call the POST method logic directly
+                return await CompleteSale(paymentMode, null);
+            }
+
+            // For CARD or UPI, redirect to the Gateway page (GET)
+            return RedirectToAction(nameof(PaymentGateway), new { mode = paymentMode });
+        }
+
+        [HttpGet]
+        public IActionResult PaymentGateway(string mode)
+        {
+            var bill = GetBill();
+            if (!bill.Items.Any()) return RedirectToAction(nameof(Index));
+
+            ViewBag.PaymentMode = mode;
+            return View("PaymentGateway", bill);
+        }
+
+        // FIX: Consolidated into ONE method to avoid AmbiguousMatchException
+        [HttpPost]
+        public async Task<IActionResult> CompleteSale(string paymentMode, string? upiId)
         {
             var bill = GetBill();
             if (!bill.Items.Any()) { TempData["Error"] = "Bill is empty."; return RedirectToAction(nameof(Index)); }
+
             try
             {
-                // Get cashier name from session - no Identity needed
                 string cashierName = SessionHelper.GetUserName(HttpContext.Session);
                 int cashierId = SessionHelper.GetUserId(HttpContext.Session);
 
@@ -81,10 +113,16 @@ namespace GamblersGrocery.Controllers
 
                 var tx = await _posService.CompleteSaleAsync(bill, cashierId, cashierName, paymentMode);
                 HttpContext.Session.Remove(BillKey);
-                TempData["Success"] = $"Sale completed! Bill #{tx.transactionId}";
+
+                TempData["Success"] = $"Sale completed via {paymentMode}! Bill #{tx.transactionId}";
                 return RedirectToAction(nameof(GetTransactionDetails), new { transactionId = tx.transactionId });
             }
-            catch (Exception ex) { _logger.LogError(ex, "CompleteSale failed"); TempData["Error"] = "Could not complete sale."; return RedirectToAction(nameof(Index)); }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CompleteSale failed");
+                TempData["Error"] = "Could not complete sale.";
+                return RedirectToAction(nameof(Index));
+            }
         }
 
         [SessionAuthorize("Admin", "Cashier", "Store Manager")]
