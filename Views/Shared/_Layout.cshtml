@@ -54,7 +54,7 @@
                         </li>
                     }
 
-                    @if (sessionRole == "Admin" || sessionRole == "Cashier")
+                    @if ( sessionRole == "Cashier")
                     {
                         <li class="nav-section-label w-100">POS</li>
                         <li class="nav-item w-100">
@@ -65,7 +65,7 @@
                         </li>
                     }
 
-                    @if (sessionRole == "Admin" || sessionRole == "Store Manager")
+                    @if (sessionRole == "Store Manager")
                     {
                         <li class="nav-section-label w-100">CATALOG</li>
                         <li class="nav-item w-100">
@@ -117,12 +117,21 @@
                                 </a>
                             </li>
                         }
+                        @if (sessionRole == "Cashier")
+                        {
                         <li class="nav-item w-100">
                             <a asp-controller="Report" asp-action="CloseDay"
                                    class="nav-link @(currCtrl == "Report" && currAct == "CloseDay" ? "active" : "")">
                                 <i class="fas fa-moon"></i> Close Day
                             </a>
                         </li>
+                            <li class="nav-item w-100">
+                                <a asp-controller="Report" asp-action="Index"
+                                       class="nav-link @(currCtrl == "Report" && currAct == "Index" ? "active" : "")">
+                                    <i class="fas fa-file-invoice"></i> Settlements
+                                </a>
+                            </li>
+                        }
                     }
 
                     @if (sessionRole == "Admin")
@@ -140,6 +149,12 @@
                                 <i class="fas fa-list"></i> All Products
                             </a>
                         </li>
+                            <li class="nav-item w-100">
+                                <a asp-controller="Promotion" asp-action="Index"
+                                       class="nav-link @(currCtrl == "Promotion" && currAct == "Index" ? "active" : "")">
+                                    <i class="fas fa-tag"></i>All Promotions
+                                </a>
+                            </li>
                     }
                 </ul>
 

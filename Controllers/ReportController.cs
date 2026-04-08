@@ -19,7 +19,7 @@ namespace GamblersGrocery.Controllers
             _logger = logger;
         }
 
-        [SessionAuthorize("Admin", "Store Manager")]
+        [SessionAuthorize("Admin", "Store Manager", "Cashier")]
         public async Task<IActionResult> Index()
         {
             try { return View(await _reportService.GetAllSettlementsAsync()); }
@@ -65,7 +65,7 @@ namespace GamblersGrocery.Controllers
             catch (Exception ex) { _logger.LogError(ex, "CloseDayPost failed"); TempData["Error"] = "An error occurred."; return View("CloseDay", vm); }
         }
 
-        [SessionAuthorize("Admin", "Store Manager")]
+        [SessionAuthorize("Admin", "Store Manager", "Cashier")]
         public async Task<IActionResult> GetSettlementDetails(int settlementId)
         {
             try { var s = await _reportService.GetSettlementDetailsAsync(settlementId); if (s == null) return NotFound(); return View("SettlementDetails", s); }

@@ -6,7 +6,10 @@ namespace GamblersGrocery.Services.Interfaces
     {
         Task<Product?> ScanProductAsync(string barcode);
         Task<BillViewModel> ApplyDiscountAsync(BillViewModel bill, decimal extraDiscountPercent);
-        Task<Transaction> CompleteSaleAsync(BillViewModel bill, int cashierId, string cashierName, string paymentMode);
+        Task<Transaction> CompleteSaleAsync(BillViewModel bill, int cashierId, string cashierName, string paymentMode, string? upiId = null);
         Task<Transaction?> GetTransactionDetailsAsync(int id);
+        Task<IEnumerable<Product>> GetCurrentStockLevelsAsync();
+
+        //Task CompleteSaleAsync(BillViewModel bill, int cashierId, string cashierName, string paymentMode, string upiId);
     }
 }

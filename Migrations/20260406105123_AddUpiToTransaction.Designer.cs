@@ -4,6 +4,7 @@ using GamblersGrocery.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamblersGrocery.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260406105123_AddUpiToTransaction")]
+    partial class AddUpiToTransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,8 +83,7 @@ namespace GamblersGrocery.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal?>("price")
-                        .IsRequired()
+                    b.Property<decimal>("price")
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("productName")
@@ -250,7 +252,7 @@ namespace GamblersGrocery.Migrations
                     b.Property<int>("transactionId")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("unitPrice")
+                    b.Property<decimal>("unitPrice")
                         .HasColumnType("decimal(10,2)");
 
                     b.HasKey("itemId");

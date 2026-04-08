@@ -16,7 +16,7 @@
                         <td><strong>@p.productName</strong></td>
                         <td><code>@p.barcode</code></td>
                         <td>@p.category</td>
-                        <td>Rs @p.price.ToString("N2")</td>
+                        <td>Rs @p.price?.ToString("N2")</td>
                         <td>
                             @if (p.stockQuantity == 0) { <span class="stock-out">Out of Stock</span> }
                             else if (p.stockQuantity <= 5) { <span class="stock-low">@p.stockQuantity (Low)</span> }

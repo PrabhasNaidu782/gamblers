@@ -8,7 +8,7 @@
     <p>Select an option from the sidebar to get started.</p>
 </div>
 <div class="row g-3">
-    @if (sessionRole == "Admin" || sessionRole == "Cashier")
+    @if (sessionRole == "Cashier")
     {
         <div class="col-md-4">
             <a asp-controller="Pos" asp-action="Index" class="text-decoration-none">
@@ -19,7 +19,7 @@
             </a>
         </div>
     }
-    @if (sessionRole == "Admin" || sessionRole == "Store Manager")
+    @if ( sessionRole == "Store Manager")
     {
         <div class="col-md-4">
             <a asp-controller="Product" asp-action="Index" class="text-decoration-none">

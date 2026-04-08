@@ -20,7 +20,7 @@ namespace GamblersGrocery.Services.Implementations
             {
                 var product = await _productRepo.GetProductByIdAsync(productId);
                 if (product == null) return;
-                int diff = newQuantity - product.stockQuantity;
+                int diff = (int)(newQuantity - product.stockQuantity);
                 product.stockQuantity = newQuantity;
                 await _productRepo.UpdateProductAsync(product);
                 await _repo.AddStockLogAsync(new StockLog { productId = productId, quantityChanged = diff, changeType = "MANUAL_ADJUSTMENT", timestamp = DateTime.Now });

@@ -16,7 +16,7 @@
                         {
                             <tr>
                                 <td>@item.Product?.productName</td>
-                                <td>Rs @item.unitPrice.ToString("N2")</td>
+                                <td>Rs @item.unitPrice?.ToString("N2")</td>
                                 <td>@item.quantity</td>
                                 <td>@if (item.productDiscount > 0) { <span class="text-success">-Rs @item.productDiscount.ToString("N2")</span> } else { <span class="text-muted">—</span> }</td>
                                 <td><strong>Rs @item.lineTotal.ToString("N2")</strong></td>

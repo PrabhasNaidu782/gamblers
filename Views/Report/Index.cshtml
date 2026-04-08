@@ -1,8 +1,13 @@
 @model IEnumerable<Settlement>
-@{ ViewData["Title"] = "Settlements"; }
+@{ ViewData["Title"] = "Settlements";
+    var sessionRole = Context.Session.GetString("SessionUserRole") ?? "";
+ }
 <div class="page-header d-flex justify-content-between align-items-start">
     <div><h4>Settlements</h4><p>Daily cash settlement records</p></div>
-    <a asp-action="GenerateDailySalesReport" class="btn btn-outline-primary"><i class="fas fa-chart-bar me-2"></i>Sales Report</a>
+    @if (sessionRole == "Store Manager" || sessionRole == "Admin")
+    {
+        <a asp-action="GenerateDailySalesReport" class="btn btn-outline-primary"><i class="fas fa-chart-bar me-2"></i>Sales Report</a>
+    }
 </div>
 <div class="card">
     <div class="table-responsive">

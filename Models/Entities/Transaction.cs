@@ -12,6 +12,8 @@ namespace GamblersGrocery.Models.Entities
         [Column(TypeName = "decimal(15,2)")] public decimal discountAmount { get; set; }
         [Column(TypeName = "decimal(15,2)")] public decimal finalAmount { get; set; }
         [MaxLength(10)] public string paymentMode { get; set; } = "CASH";
+
+        public string? upiId { get; set; }
         public DateTime transactionDate { get; set; } = DateTime.Now;
         public ICollection<TransactionItem> TransactionItems { get; set; } = new List<TransactionItem>();
     }

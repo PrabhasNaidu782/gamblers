@@ -1,5 +1,9 @@
 @model IEnumerable<Product>
-@{ ViewData["Title"] = "Stock Levels"; }
+@{ 
+    ViewData["Title"] = "Stock Levels"; 
+    var sessionRole = Context.Session.GetString("SessionUserRole") ?? "";
+
+}
 <div class="page-header d-flex justify-content-between align-items-start">
     <div><h4>Stock Levels</h4><p>Current inventory status</p></div>
     <a asp-action="StockLogs" class="btn btn-outline-secondary"><i class="fas fa-history me-2"></i>View Logs</a>
@@ -7,7 +11,12 @@
 <div class="card">
     <div class="table-responsive">
         <table class="table mb-0">
-            <thead><tr><th>Product</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead>
+            <thead><tr><th>Product</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th>
+                    @if (sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                    {
+                        <th>Action</th>            
+                    }
+                </tr></thead>
             <tbody>
                 @foreach (var p in Model)
                 {
@@ -15,17 +24,20 @@
                         <td><strong>@p.productName</strong></td>
                         <td><code>@p.barcode</code></td>
                         <td>@p.category</td>
-                        <td>Rs @p.price.ToString("N2")</td>
+                        <td>Rs @p.price?.ToString("N2")</td>
                         <td>
                             @if (p.stockQuantity == 0) { <span class="stock-out">Out of Stock</span> }
                             else if (p.stockQuantity <= 5) { <span class="stock-low">@p.stockQuantity (Low)</span> }
                             else { <span class="stock-ok">@p.stockQuantity</span> }
                         </td>
-                        <td>
-                            <a asp-action="AdjustStock" asp-route-productId="@p.productId" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-edit me-1"></i>Adjust
-                            </a>
-                        </td>
+                        @if (sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                        {
+                            <td>
+                                <a asp-action="AdjustStock" asp-route-productId="@p.productId" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit me-1"></i>Adjust
+                                </a>
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
