@@ -194,27 +194,27 @@
         document.querySelector('.main-content').classList.toggle('expanded');
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-        // Restore scroll
-        const savedScroll = localStorage.getItem('sidebarScrollPosition');
-        if (savedScroll) { sidebar.scrollTop = savedScroll; }
+        // document.addEventListener("DOMContentLoaded", function() {
+        // const sidebar = document.getElementById('sidebar');
+        // if (sidebar) {
+        // // Restore scroll
+        // const savedScroll = localStorage.getItem('sidebarScrollPosition');
+        // if (savedScroll) { sidebar.scrollTop = savedScroll; }
 
-        // Save scroll on click
-        sidebar.addEventListener('click', function(e) {
-        if (e.target.closest('.nav-link')) {
-        localStorage.setItem('sidebarScrollPosition', sidebar.scrollTop);
-        }
-        });
+        // // Save scroll on click
+        // sidebar.addEventListener('click', function(e) {
+        // if (e.target.closest('.nav-link')) {
+        // localStorage.setItem('sidebarScrollPosition', sidebar.scrollTop);
+        // }
+        // });
 
-        // Auto-scroll active into center
-        const activeLink = sidebar.querySelector('.nav-link.active');
-        if (activeLink) {
-        activeLink.scrollIntoView({ behavior: 'auto', block: 'center' });
-        }
-        }
-        });
+        // // Auto-scroll active into center
+        // const activeLink = sidebar.querySelector('.nav-link.active');
+        // if (activeLink) {
+        // activeLink.scrollIntoView({ behavior: 'auto', block: 'center' });
+        // }
+        // }
+        // });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
