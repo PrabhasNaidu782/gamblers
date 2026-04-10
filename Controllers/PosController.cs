@@ -19,19 +19,20 @@ namespace GamblersGrocery.Controllers
 
         private readonly IPosService _posService;
         private readonly ILogger<PosController> _logger;
-        private readonly IProductService _productService; // Add this
+        private readonly IProductService _productService;
+
         public PosController(IPosService posService, IProductService productService, ILogger<PosController> logger)
         {
             _posService = posService;
-            _productService = productService; // Initialize this
+            _productService = productService;
             _logger = logger;
         }
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             try
             {
-                // Fetch all products to populate the search dropdown in the View
                 ViewBag.AllProducts = await _posService.GetCurrentStockLevelsAsync();
                 return View("Billing", GetBill());
             }
@@ -45,21 +46,20 @@ namespace GamblersGrocery.Controllers
         [HttpPost]
         public async Task<IActionResult> ScanProduct(string barcode)
         {
-            // ... (existing null checks)
             if (string.IsNullOrWhiteSpace(barcode))
-
             {
-
                 TempData["Error"] = "Please enter a barcode.";
-
                 return RedirectToAction(nameof(Index));
-
             }
 
             try
             {
                 var product = await _posService.ScanProductAsync(barcode.Trim());
-                // ... (existing product null checks)
+                if (product == null)
+                {
+                    TempData["Error"] = "Product not found.";
+                    return RedirectToAction(nameof(Index));
+                }
 
                 var bill = GetBill();
                 var existing = bill.Items.FirstOrDefault(i => i.productId == product.productId);
@@ -68,14 +68,7 @@ namespace GamblersGrocery.Controllers
                 {
                     int currentQty = existing.quantity ?? 0;
 
-                    // Check 1: Hard limit of 99
-                    if (currentQty + 1 > 99)
-                    {
-                        TempData["Error"] = "Maximum quantity limit (99) reached for this item.";
-                        return RedirectToAction(nameof(Index));
-                    }
-
-                    // Check 2: Actual stock limit
+                    // VALIDATION: Check against actual stock only
                     if (currentQty + 1 > product.stockQuantity)
                     {
                         TempData["Error"] = $"Cannot add more. Only {product.stockQuantity} in stock.";
@@ -86,39 +79,72 @@ namespace GamblersGrocery.Controllers
                 }
                 else
                 {
+                    // NEW ITEM: Ensure we have at least 1 in stock before adding
+                    if (product.stockQuantity < 1)
+                    {
+                        TempData["Error"] = "Product is out of stock.";
+                        return RedirectToAction(nameof(Index));
+                    }
+
                     bill.Items.Add(new BillItemViewModel
                     {
                         productId = product.productId,
                         productName = product.productName,
                         barcode = product.barcode,
                         unitPrice = product.price,
-                        quantity = 1, // This works because 1 is a valid int
-                        availableStock = product.stockQuantity ?? 0 // This works if property exists
+                        quantity = 1,
+                        availableStock = product.stockQuantity ?? 0
                     });
                 }
 
-
                 bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
-
                 SaveBill(bill);
 
-
-
                 TempData["Success"] = $"'{product.productName}' added.";
-
                 return RedirectToAction(nameof(Index));
-
-                // ... (Save and Redirect)
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 _logger.LogError(ex, "ScanProduct failed");
-
                 TempData["Error"] = "An error occurred while scanning.";
-
                 return RedirectToAction(nameof(Index));
             }
         }
 
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> UpdateQty(int productId, int? quantity)
+        {
+            var bill = GetBill();
+            var item = bill.Items.FirstOrDefault(i => i.productId == productId);
+            var product = await _productService.GetProductDetailsAsync(productId);
+
+            if (item != null && product != null && quantity.HasValue)
+            {
+                if (quantity > product.stockQuantity)
+                {
+                    
+                    item.quantity = product.stockQuantity;
+
+                    
+                    TempData["Error"] = $"Max quantity for  {product.productName} is in stock ({product.stockQuantity}).";
+                }
+                else if (quantity < 1)
+                {
+                    item.quantity = 1;
+                }
+                else
+                {
+                    item.quantity = quantity;
+                }
+            }
+
+            bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
+            SaveBill(bill);
+
+            
+            return RedirectToAction(nameof(Index));
+        }
         [HttpPost]
         public async Task<IActionResult> ApplyDiscount(decimal discountPercent)
         {
@@ -149,11 +175,9 @@ namespace GamblersGrocery.Controllers
 
             if (paymentMode == "CASH")
             {
-                // Internal call to CompleteSale logic directly to maintain POST context
                 return await CompleteSale(paymentMode, null);
             }
 
-            // For CARD or UPI, redirect to the Gateway page
             return RedirectToAction(nameof(PaymentGateway), new { mode = paymentMode });
         }
 
@@ -187,7 +211,6 @@ namespace GamblersGrocery.Controllers
 
                 var tx = await _posService.CompleteSaleAsync(bill, cashierId, cashierName, paymentMode, upiId);
 
-                // Clear the current bill from session after successful save
                 HttpContext.Session.Remove(BillKey);
 
                 TempData["Success"] = $"Sale completed via {paymentMode}! Bill #{tx.transactionId}";
@@ -233,42 +256,6 @@ namespace GamblersGrocery.Controllers
                 _logger.LogError(ex, "RemoveItem failed");
                 return RedirectToAction(nameof(Index));
             }
-        }
-
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateQty(int productId, int? quantity)
-        {
-            var bill = GetBill();
-            var item = bill.Items.FirstOrDefault(i => i.productId == productId);
-
-            if (item != null && quantity.HasValue)
-            {
-                // 1. Check for the 99 limit
-                if (quantity > 99)
-                {
-                    TempData["Error"] = "Maximum allowed quantity is 99."; // This stays after refresh
-                    item.quantity = 99;
-                }
-                else
-                {
-                    // 2. Then check database stock as usual
-                    var product = await _productService.GetProductDetailsAsync(productId);
-                    if (quantity > product.stockQuantity)
-                    {
-                        TempData["Error"] = $"Only {product.stockQuantity} available.";
-                        item.quantity = product.stockQuantity;
-                    }
-                    else
-                    {
-                        item.quantity = quantity;
-                    }
-                }
-            }
-
-            bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
-            SaveBill(bill);
-            return RedirectToAction(nameof(Index)); // Page reloads here
         }
 
         public IActionResult ClearBill()

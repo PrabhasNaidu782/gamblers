@@ -72,16 +72,18 @@ namespace GamblersGrocery.Services.Implementations
 
                 foreach (var item in bill.Items)
                 {
+
                     tx.TransactionItems.Add(new TransactionItem
                     {
                         productId = item.productId,
-                        // FIX 3: Cast nullable quantity (int?) to (int)
+                   
                         quantity = item.quantity ?? 0,
-                        // FIX 4: Mapping unitPrice (decimal?)
+                        
                         unitPrice = item.unitPrice ?? 0,
                         productDiscount = item.productDiscount,
                         lineTotal = item.lineTotal
                     });
+
 
                     // FIX 5: Convert nullable int? to int for the repository method
                     await _inventoryRepo.UpdateStockAsync(item.productId, -(item.quantity ?? 0), "SALE_UPDATE");
