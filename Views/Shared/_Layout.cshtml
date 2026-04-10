@@ -82,7 +82,7 @@
                         </li>
                     }
 
-                    @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                    @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate" || sessionRole == "Cashier")
                     {
                         <li class="nav-section-label w-100">INVENTORY</li>
                         <li class="nav-item w-100">
@@ -91,13 +91,17 @@
                                 <i class="fas fa-warehouse"></i> Stock Levels
                             </a>
                         </li>
-                        <li class="nav-item w-100">
+                        @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                            { 
+                            <li class="nav-item w-100">
                             <a asp-controller="Inventory" asp-action="StockLogs"
                                    class="nav-link @(currCtrl == "Inventory" && currAct == "StockLogs" ? "active" : "")">
                                 <i class="fas fa-history"></i> Stock Logs
                             </a>
                         </li>
+                        }
                     }
+
 
                     @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Cashier")
                     {
@@ -194,27 +198,27 @@
         document.querySelector('.main-content').classList.toggle('expanded');
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
+        // document.addEventListener("DOMContentLoaded", function() {
+        // const sidebar = document.getElementById('sidebar');
+        // if (sidebar) {
         // Restore scroll
-        const savedScroll = localStorage.getItem('sidebarScrollPosition');
-        if (savedScroll) { sidebar.scrollTop = savedScroll; }
+        // const savedScroll = localStorage.getItem('sidebarScrollPosition');
+        // if (savedScroll) { sidebar.scrollTop = savedScroll; }
 
         // Save scroll on click
-        sidebar.addEventListener('click', function(e) {
-        if (e.target.closest('.nav-link')) {
-        localStorage.setItem('sidebarScrollPosition', sidebar.scrollTop);
-        }
-        });
+        // sidebar.addEventListener('click', function(e) {
+        // if (e.target.closest('.nav-link')) {
+        // localStorage.setItem('sidebarScrollPosition', sidebar.scrollTop);
+        // }
+        // });
 
         // Auto-scroll active into center
-        const activeLink = sidebar.querySelector('.nav-link.active');
-        if (activeLink) {
-        activeLink.scrollIntoView({ behavior: 'auto', block: 'center' });
-        }
-        }
-        });
+        // const activeLink = sidebar.querySelector('.nav-link.active');
+        // if (activeLink) {
+        // activeLink.scrollIntoView({ behavior: 'auto', block: 'center' });
+        // }
+        // }
+        // });
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

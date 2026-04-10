@@ -37,9 +37,12 @@ namespace GamblersGrocery.Services.Implementations
                 {
                     var promo = await _promoRepo.GetActivePromotionForProductAsync(item.productId);
                     item.discountPercent = promo?.discountPercent ?? 0;
-                    item.productDiscount = Math.Round((item.unitPrice ?? 0) * item.quantity * item.discountPercent / 100, 2);
 
-                    item.lineTotal = Math.Round(((item.unitPrice ?? 0) * item.quantity) - item.productDiscount, 2);
+                    // FIX 1: Added (decimal) cast and ?? 0 to unitPrice and quantity
+                    item.productDiscount = Math.Round((item.unitPrice ?? 0) * (item.quantity ?? 0) * item.discountPercent / 100, 2);
+
+                    // FIX 2: Added ?? 0 for math operations
+                    item.lineTotal = Math.Round(((item.unitPrice ?? 0) * (item.quantity ?? 0)) - item.productDiscount, 2);
                     sub += item.lineTotal;
                 }
                 bill.subTotal = sub;
@@ -59,7 +62,7 @@ namespace GamblersGrocery.Services.Implementations
                 {
                     cashierId = cashierId,
                     cashierName = cashierName,
-                    totalAmount = bill.subTotal + bill.billDiscountAmount, // Total before extra bill discount
+                    totalAmount = bill.subTotal + bill.billDiscountAmount,
                     discountAmount = bill.billDiscountAmount + bill.Items.Sum(i => i.productDiscount),
                     finalAmount = bill.totalAmount,
                     upiId = upiId,
@@ -72,13 +75,16 @@ namespace GamblersGrocery.Services.Implementations
                     tx.TransactionItems.Add(new TransactionItem
                     {
                         productId = item.productId,
-                        quantity = item.quantity,
-                        unitPrice = item.unitPrice,
+                        // FIX 3: Cast nullable quantity (int?) to (int)
+                        quantity = item.quantity ?? 0,
+                        // FIX 4: Mapping unitPrice (decimal?)
+                        unitPrice = item.unitPrice ?? 0,
                         productDiscount = item.productDiscount,
                         lineTotal = item.lineTotal
                     });
 
-                    await _inventoryRepo.UpdateStockAsync(item.productId, -item.quantity, "SALE_UPDATE");
+                    // FIX 5: Convert nullable int? to int for the repository method
+                    await _inventoryRepo.UpdateStockAsync(item.productId, -(item.quantity ?? 0), "SALE_UPDATE");
                 }
 
                 await _txRepo.AddTransactionAsync(tx);
