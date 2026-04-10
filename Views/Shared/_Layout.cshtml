@@ -82,7 +82,7 @@
                         </li>
                     }
 
-                    @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                    @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate" || sessionRole == "Cashier")
                     {
                         <li class="nav-section-label w-100">INVENTORY</li>
                         <li class="nav-item w-100">
@@ -91,12 +91,15 @@
                                 <i class="fas fa-warehouse"></i> Stock Levels
                             </a>
                         </li>
+                        @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                        {
                         <li class="nav-item w-100">
                             <a asp-controller="Inventory" asp-action="StockLogs"
                                    class="nav-link @(currCtrl == "Inventory" && currAct == "StockLogs" ? "active" : "")">
                                 <i class="fas fa-history"></i> Stock Logs
                             </a>
                         </li>
+                        }
                     }
 
                     @if (sessionRole == "Admin" || sessionRole == "Store Manager" || sessionRole == "Cashier")
