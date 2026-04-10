@@ -89,6 +89,11 @@ namespace GamblersGrocery.Services.Implementations
 
 				foreach (var item in bill.Items)
 				{
+					var product = await _productRepo.GetProductByIdAsync(item.productId);
+					if (product == null)
+						throw new Exception("Product not found");
+					if (item.quantity > product.stockQuantity)
+						throw new Exception($"Not enough stock for {product.productName}. Available : {product.stockQuantity}");
 					transaction.TransactionItems.Add(new TransactionItem
 					{
 						productId = item.productId,

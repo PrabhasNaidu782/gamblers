@@ -8,8 +8,12 @@ namespace GamblersGrocery.Models.Entities
         [Key] public int transactionId { get; set; }
         public int cashierId { get; set; }
         public string cashierName { get; set; } = string.Empty;
-        [Column(TypeName = "decimal(15,2)")] public decimal totalAmount { get; set; }
-        [Column(TypeName = "decimal(15,2)")] public decimal discountAmount { get; set; }
+
+        [Column(TypeName = "decimal(15,2)")] 
+        public decimal totalAmount { get; set; }
+
+        [Column(TypeName = "decimal(15,2)")] 
+        public decimal discountAmount { get; set; }
         [Column(TypeName = "decimal(15,2)")] public decimal finalAmount { get; set; }
         [MaxLength(10)] public string paymentMode { get; set; } = "CASH";
 

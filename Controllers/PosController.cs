@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace GamblersGrocery.Controllers
 {
-    [SessionAuthorize("Admin", "Cashier")]
+    [SessionAuthorize("Cashier")]
     public class PosController : Controller
     {
         private readonly IPosService _posService;
@@ -39,7 +39,7 @@ namespace GamblersGrocery.Controllers
         [HttpPost]
         public async Task<IActionResult> ScanProduct(string barcode)
         {
-            if (string.IsNullOrWhiteSpace(barcode))
+            if (string.IsNullOrWhiteSpace(barcode)) 
             {
                 TempData["Error"] = "Please enter a barcode.";
                 return RedirectToAction(nameof(Index));
@@ -163,21 +163,23 @@ namespace GamblersGrocery.Controllers
 
                 // Clear the current bill from session after successful save
                 HttpContext.Session.Remove(BillKey);
-
-                TempData["Success"] = $"Sale completed via {paymentMode}! Bill #{tx.transactionId}";
-                return RedirectToAction(nameof(GetTransactionDetails), new { transactionId = tx.transactionId });
+                return RedirectToAction(nameof(GetTransactionDetails), new { transactionId = tx.transactionId, success = "done" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "CompleteSale failed");
-                TempData["Error"] = "Could not complete sale.";
+                TempData["Error"] = ex.Message;
                 return RedirectToAction(nameof(Index));
             }
         }
 
         [SessionAuthorize("Admin", "Cashier", "Store Manager")]
-        public async Task<IActionResult> GetTransactionDetails(int transactionId)
+        public async Task<IActionResult> GetTransactionDetails(int transactionId, string sucess)
         {
+            if (!string.IsNullOrEmpty(sucess))
+            {
+                TempData["Success"] = "Sale completed successfully !";
+            }
             try
             {
                 var tx = await _posService.GetTransactionDetailsAsync(transactionId);
