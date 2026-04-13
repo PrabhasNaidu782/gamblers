@@ -44,6 +44,7 @@ namespace GamblersGrocery.Models.ViewModels
         public decimal discountPercent { get; set; }
         public decimal productDiscount { get; set; }
         public decimal lineTotal { get; set; }
+        public int availableStock { get; set; }
     }
 
     public class BillViewModel

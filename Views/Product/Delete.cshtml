@@ -11,7 +11,12 @@
             <tr><td class="text-muted">Category</td><td>@Model.category</td></tr>
             <tr><td class="text-muted">Price</td><td>Rs @Model.price?.ToString("N2")</td></tr>
         </table>
-        <p class="text-danger small"><i class="fas fa-exclamation-triangle me-1"></i>This action cannot be undone.</p>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <p class="text-danger fw-bold">
+                        @ViewData.ModelState.Values.SelectMany(v => v.Errors).FirstOrDefault()?.ErrorMessage
+                    </p>
+                }
         <form asp-action="DeleteConfirmed" method="post">
             <input type="hidden" name="productId" value="@Model.productId" />
             <div class="d-flex gap-2">

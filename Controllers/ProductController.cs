@@ -163,8 +163,11 @@ namespace GamblersGrocery.Controllers
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "DeleteConfirmed failed");
-				TempData["Error"] = "Cannot delete — may be linked to transactions.";
-				return RedirectToAction(nameof(Index));
+
+				ModelState.AddModelError("", "Cannot delete - product is linked to transactions.");
+
+				var product = await _productService.GetProductDetailsAsync(productId);
+				return View("Delete", product);
 			}
 		}
 

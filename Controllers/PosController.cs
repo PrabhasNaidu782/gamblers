@@ -60,11 +60,18 @@ namespace GamblersGrocery.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
+                var stock = product.stockQuantity;
+
                 var bill = GetBill();
                 var existing = bill.Items.FirstOrDefault(i => i.productId == product.productId);
 
                 if (existing != null)
                 {
+                   if (existing.quantity +1 > stock)
+                   {
+                        TempData["Error"] = $"Only {stock} items available";
+                        return RedirectToAction(nameof(Index));
+                   }
                     existing.quantity++;
                 }
                 else
@@ -75,7 +82,8 @@ namespace GamblersGrocery.Controllers
                         productName = product.productName,
                         barcode = product.barcode,
                         unitPrice = product.price,
-                        quantity = 1
+                        quantity = 1,
+                        availableStock = stock ?? 0
                     });
                 }
 

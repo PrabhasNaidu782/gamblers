@@ -83,7 +83,7 @@
                 {
                     <div class="table-responsive">
                         <table class="table mb-0">
-                            <thead><tr><th>Product</th><th>Unit Price</th><th>Promo</th><th>Qty</th><th>Total</th><th></th></tr></thead>
+                            <thead><tr><th>Product</th><th>Unit Price</th><th>Promo</th><th>Available</th><th>Qty</th><th>Total</th><th></th></tr></thead>
                             <tbody>
                                 @foreach (var item in Model.Items)
                                 {
@@ -101,10 +101,11 @@
                                             }
                                             else { <span class="text-muted">—</span> }
                                         </td>
+                                        <td>@item.availableStock</td>
                                         <td>
                                             <form asp-action="UpdateQty" asp-controller="Pos" method="post">
                                                 <input type="hidden" name="productId" value="@item.productId" />
-                                                <input type="number" name="quantity" value="@item.quantity" min="1" max="999"
+                                                <input type="number" name="quantity" value="@item.quantity" min="1" max="@item.availableStock"
                                                        class="form-control form-control-sm" style="width:70px;"
                                                        onchange="this.form.submit()" />
                                             </form>
