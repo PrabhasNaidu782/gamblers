@@ -4,6 +4,25 @@
     var cashierName = Context.Session.GetString("SessionUserName") ?? "";
 }
 
+@* 1. Persistent Alert for Server-Side and Client-Side errors *@
+@if (TempData["Error"] != null)
+{
+    <div id="persistentAlert" class="alert alert-danger alert-dismissible fade show shadow-lg" role="alert"
+         style="position: fixed; top: 20px; right: 20px; z-index: 10000; min-width: 300px;">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Attention:</strong> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@* 2. Hidden Template for JavaScript alerts (Out of Stock) *@
+<div id="stockAlert" class="alert alert-danger d-none shadow-lg" role="alert" 
+     style="position: fixed; top: 20px; right: 20px; z-index: 10000; min-width: 300px;">
+    <i class="fas fa-exclamation-circle me-2"></i>
+    <span id="stockAlertMessage">Out of stock!</span>
+    <button type="button" class="btn-close float-end" onclick="document.getElementById('stockAlert').classList.add('d-none')"></button>
+</div>
+
 <div class="page-header">
     <h4>POS Billing</h4>
     <p>Scan a barcode to add items to the bill</p>
@@ -11,45 +30,42 @@
 
 <div class="row g-3">
     <div class="col-lg-8">
-        @* <div class="card mb-3 border-info shadow-sm">
-            <div class="card-header bg-info text-white py-2">
-                <span class="small fw-bold"><i class="d-none"></i>Product ID Lookup</span>
-            </div>
-            <div class="card-body py-2">
-                <div class="position-relative">
-                    <input type="text" id="idLookupInput" class="form-control form-control-sm" 
-                           placeholder="Search by product name..." onkeyup="filterProductIds()" autocomplete="off" />
-                    
-                    
-                </div>
-                <div id="copyStatus" class="small mt-1 text-success fw-bold" style="display:none;">
-                    <i class="fas fa-check me-1"></i> Copied and pasted!
-                </div>
-            </div>
-        </div> *@
-
         <div class="card mb-3">
             <div class="card-header">Scan Product</div>
             <div class="card-body">
-                <form asp-action="ScanProduct" asp-controller="Pos" method="post">
+                <form asp-action="ScanProduct" asp-controller="Pos" method="post" id="scanForm">
                     <div class="input-group">
                         <input type="text" name="barcode" id="mainBarcodeField" class="form-control form-control-lg"
-                               placeholder="Enter barcode and press Enter..." onkeyup="filterProductIds()"  autofocus autocomplete="off" />
-                               <div id="productDataSource" class="list-group shadow-lg d-none">
-                        @if (ViewBag.AllProducts != null)
-                        {
-                            foreach (var p in (IEnumerable<GamblersGrocery.Models.Entities.Product>)ViewBag.AllProducts)
+                               placeholder="Enter barcode and press Enter..." onkeyup="filterProductIds()" autofocus autocomplete="off" />
+                        
+                        <div id="productDataSource" class="list-group shadow-lg d-none">
+                            @if (ViewBag.AllProducts != null)
                             {
-                                <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center lookup-item" 
-                                     data-name="@p.productName.ToLower()">
-                                    <span>@p.productName</span>
-                                    <button type="button" class="btn btn-sm btn-primary py-0 px-2" onclick="copyToScan('@p.barcode')">
-                                        <i class="fas fa-copy me-1"></i> @p.barcode
-                                    </button>
-                                </div>
+                                foreach (var p in (IEnumerable<GamblersGrocery.Models.Entities.Product>)ViewBag.AllProducts)
+                                {
+                                    @* Logic for Stock Visuals in Search *@
+                                    var stockStatus = p.stockQuantity <= 0 ? "bg-danger" : (p.stockQuantity < 10 ? "bg-warning text-dark" : "bg-success");
+                                    var stockText = p.stockQuantity <= 0 ? "Out of Stock" : $"Stock: {p.stockQuantity}";
+
+                                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center lookup-item" 
+                                         data-name="@p.productName.ToLower()"
+                                         data-barcode="@p.barcode"
+                                         data-stock="@p.stockQuantity">
+                                        <div>
+                                            <span class="fw-bold">@p.productName</span>
+                                            <br />
+                                            <small class="text-muted">@p.barcode</small>
+                                            @* Feature: Show stock quantity while searching *@
+                                            <span class="badge @stockStatus ms-2">@stockText</span>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-primary py-1 px-3" 
+                                                onclick="handleProductSelection('@p.barcode', @p.stockQuantity)">
+                                            <i class="fas fa-plus me-1"></i> @p.barcode
+                                        </button>
+                                    </div>
+                                }
                             }
-                        }
-                    </div>
+                        </div>
                         <button class="btn btn-primary btn-lg" type="submit"><i class="fas fa-plus me-1"></i>Add</button>
                     </div>
                 </form>
@@ -97,9 +113,13 @@
                                         <td>
                                             <form asp-action="UpdateQty" asp-controller="Pos" method="post">
                                                 <input type="hidden" name="productId" value="@item.productId" />
-                                                <input type="number" name="quantity" value="@item.quantity" min="1" max="999"
-                                                       class="form-control form-control-sm" style="width:70px;"
-                                                       onchange="this.form.submit()" />
+                                                <input type="number" 
+                                                       name="quantity" 
+                                                       value="@(item.quantity ?? 1)" 
+                                                       min="1" 
+                                                       @* max="@item.availableStock"  class="form-control form-control-sm"  *@
+                                                       style="width:70px;"
+                                                       onchange="validateQty(this, @item.availableStock)" />
                                             </form>
                                         </td>
                                         <td><strong>Rs @item.lineTotal.ToString("N2")</strong></td>
@@ -117,6 +137,7 @@
         </div>
     </div>
 
+    @* Right Column: Summary & Payment *@
     <div class="col-lg-4">
         <div class="card mb-3">
             <div class="card-header" style="background:#1e2a38;color:#fff;">Bill Summary</div>
@@ -187,86 +208,97 @@
 </div>
 
 <style>
-    #productDataSource {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        z-index: 1050;
-        max-height: 200px;
-        overflow-y: auto;
-        background: white;
-        border: 1px solid #ced4da;
-    }
+    #productDataSource { position: absolute; top: 100%; left: 0; right: 0; z-index: 1050; max-height: 250px; overflow-y: auto; background: white; border: 1px solid #ced4da; }
     .lookup-item { font-size: 13px; cursor: pointer; }
-    .pay-btn {
-        display: block;
-        padding: 10px;
-        text-align: center;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 11px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-    input[type="radio"]:checked + .pay-btn {
-        background-color: #1e2a38;
-        color: white;
-        border-color: #1e2a38;
-    }
+    .pay-btn { display: block; padding: 10px; text-align: center; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.2s; }
+    input[type="radio"]:checked + .pay-btn { background-color: #1e2a38; color: white; border-color: #1e2a38; }
 </style>
 
 <script>
+    // Handles the automatic closing of alerts after 5 seconds
+    window.onload = function() {
+        const pAlert = document.getElementById('persistentAlert');
+        if (pAlert) {
+            setTimeout(() => {
+                var bsAlert = new bootstrap.Alert(pAlert);
+                bsAlert.close();
+            }, 5000);
+        }
+    };
+
+    function triggerStockAlert(message) {
+        const alertBox = document.getElementById('stockAlert');
+        const alertMessage = document.getElementById('stockAlertMessage');
+        if (alertBox && alertMessage) {
+            alertMessage.innerText = message;
+            alertBox.classList.remove('d-none');
+            setTimeout(() => { alertBox.classList.add('d-none'); }, 5000);
+        }
+    }
+
     function filterProductIds() {
         const input = document.getElementById('mainBarcodeField').value.toLowerCase();
         const list = document.getElementById('productDataSource');
         const items = list.getElementsByClassName('lookup-item');
-        
-        if (input.length < 2) {
-            list.classList.add('d-none');
-            return;
-        }
-
+        if (input.length < 1) { list.classList.add('d-none'); return; }
         let hasResults = false;
         for (let i = 0; i < items.length; i++) {
             const name = items[i].getAttribute('data-name');
-            if (name.includes(input)) {
+            const barcode = items[i].getAttribute('data-barcode');
+            if (name.includes(input) || (barcode && barcode.includes(input))) {
                 items[i].classList.remove('d-none');
                 hasResults = true;
-            } else {
-                items[i].classList.add('d-none');
-            }
+            } else { items[i].classList.add('d-none'); }
         }
-
         if (hasResults) list.classList.remove('d-none');
         else list.classList.add('d-none');
     }
 
-    function copyToScan(barcode) {
-        
-        navigator.clipboard.writeText(barcode);
-        
-        // Paste into main scan box
-        const scanInput = document.getElementById('mainBarcodeField');
-        scanInput.value = barcode;
-        
-        // Show status
-        const status = document.getElementById('copyStatus');
-        status.style.display = 'block';
-        setTimeout(() => { status.style.display = 'none'; }, 2000);
-
-        // Reset search
+    function handleProductSelection(barcode, stock) {
+        if (stock <= 0) {
+            triggerStockAlert("Cannot add: Product is out of stock.");
+            return;
+        }
+        document.getElementById('mainBarcodeField').value = barcode;
         document.getElementById('productDataSource').classList.add('d-none');
-        document.getElementById('mainBarcodeField').value = '';
-        
-        // Auto-focus the main scan box
-        scanInput.focus();
+        document.getElementById('scanForm').submit();
     }
+
+
+    
+
+
+  function validateQty(input, maxStock) {
+    let val = parseInt(input.value);
+
+    // Basic validation
+    if (isNaN(val) || val < 1) {
+        input.value = 1;
+    }
+
+    
+    input.form.submit();
+}
+    
+    document.getElementById('scanForm').addEventListener('submit', function(e) {
+        const barcodeValue = document.getElementById('mainBarcodeField').value.trim();
+        const items = document.getElementsByClassName('lookup-item');
+        for (let item of items) {
+            if (item.getAttribute('data-barcode') === barcodeValue) {
+                const stock = parseInt(item.getAttribute('data-stock'));
+                if (stock <= 0) {
+                    e.preventDefault();
+                    triggerStockAlert("Out of Stock! Cannot add this product.");
+                    return false;
+                }
+            }
+        }
+    });
 
     // Close list when clicking away
     document.addEventListener('click', function(e) {
-        if (!document.getElementById('mainBarcodeField').contains(e.target)) {
+        const mainField = document.getElementById('mainBarcodeField');
+        if (mainField && !mainField.contains(e.target)) {
             document.getElementById('productDataSource').classList.add('d-none');
         }
     });

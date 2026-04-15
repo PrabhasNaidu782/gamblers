@@ -40,10 +40,12 @@ namespace GamblersGrocery.Models.ViewModels
         public string productName { get; set; } = string.Empty;
         public string barcode { get; set; } = string.Empty;
         public decimal? unitPrice { get; set; }
-        public int quantity { get; set; }
+        public int? quantity { get; set; }
         public decimal discountPercent { get; set; }
         public decimal productDiscount { get; set; }
         public decimal lineTotal { get; set; }
+
+        public int availableStock { get; set; }
     }
 
     public class BillViewModel
