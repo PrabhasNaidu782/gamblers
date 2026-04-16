@@ -1,12 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace GamblersGrocery.Models.Entities
 {
+ 
     public class Product
     {
         [Key] public int productId { get; set; }
-        [Required(ErrorMessage = "Product name is required")][MaxLength(100)][Display(Name = "Product Name")]
+        [Required(ErrorMessage = "Product name is required")]
+        [RegularExpression("^[a-zA-Z0-9() ]+$", ErrorMessage = "Product name can only contain letters, numbers, and parentheses")]
+        [MaxLength(100)][Display(Name = "Product Name")]
         public string productName { get; set; } = string.Empty;
         [MaxLength(50)][Display(Name = "Barcode")]
         public string barcode { get; set; } = string.Empty;

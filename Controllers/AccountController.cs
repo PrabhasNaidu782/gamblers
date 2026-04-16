@@ -1,26 +1,25 @@
 using GamblersGrocery.Data;
+using GamblersGrocery.Filters;
 using GamblersGrocery.Models.ViewModels;
+using GamblersGrocery.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GamblersGrocery.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AppDbContext _db;
+        private readonly IUserService _userService;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(AppDbContext db, ILogger<AccountController> logger)
+        public AccountController(IUserService userService, ILogger<AccountController> logger)
         {
-            _db = db;
+            _userService = userService;
             _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
         {
-            // Already logged in - redirect
-            //git changes
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToHome();
             ViewData["ReturnUrl"] = returnUrl;
@@ -31,35 +30,25 @@ namespace GamblersGrocery.Controllers
         public async Task<IActionResult> Login(LoginViewModel vm, string? returnUrl = null)
         {
             if (!ModelState.IsValid) return View(vm);
-
             try
             {
-                // Find user by email
-                var user = await _db.AppUsers
-                    .FirstOrDefaultAsync(u => u.Email == vm.Email);
-
-                if (user == null || !BCrypt.Net.BCrypt.Verify(vm.Password, user.PasswordHash))
+                var user = await _userService.ValidateLoginAsync(vm.Email, vm.Password);
+                if (user == null)
                 {
                     ModelState.AddModelError("", "Invalid email or password.");
                     return View(vm);
                 }
-
-                // Store user in session
                 SessionHelper.SetUser(HttpContext.Session, user);
-                _logger.LogInformation("User {Email} logged in via session", vm.Email);
-
-                // Redirect based on role
+                _logger.LogInformation("User {Email} logged in", vm.Email);
                 if (user.Role == "Admin")
                     return RedirectToAction("Dashboard", "Admin");
-
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
-
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Login error for {Email}", vm.Email);
+                _logger.LogError(ex, "Login error");
                 ModelState.AddModelError("", "An error occurred. Please try again.");
                 return View(vm);
             }
@@ -68,7 +57,6 @@ namespace GamblersGrocery.Controllers
         [HttpPost]
         public IActionResult Logout()
         {
-            SessionHelper.Clear(HttpContext.Session);
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");
         }
