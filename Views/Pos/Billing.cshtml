@@ -97,7 +97,7 @@
                                         <td>
                                             <form asp-action="UpdateQty" asp-controller="Pos" method="post">
                                                 <input type="hidden" name="productId" value="@item.productId" />
-                                                <input type="number" name="quantity" value="@item.quantity" min="1" max="999"
+                                                <input type="number" name="quantity" value="@item.quantity" min="1" max="9999"
                                                        class="form-control form-control-sm" style="width:70px;"
                                                        onchange="this.form.submit()" />
                                             </form>

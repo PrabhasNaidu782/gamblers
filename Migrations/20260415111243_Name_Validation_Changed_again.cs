@@ -5,24 +5,18 @@
 namespace GamblersGrocery.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUpiToTransaction : Migration
+    public partial class Name_Validation_Changed_again : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "upiId",
-                table: "Transactions",
-                type: "nvarchar(max)",
-                nullable: true);
+
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "upiId",
-                table: "Transactions");
+
         }
     }
 }

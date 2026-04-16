@@ -9,9 +9,12 @@ namespace GamblersGrocery.Controllers
     [SessionAuthorize("Admin", "Store Manager")]
     public class ProductController : Controller
     {
+        private readonly IPosService _pos;
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
-        public ProductController(IProductService productService, ILogger<ProductController> logger) { _productService = productService; _logger = logger; }
+        public ProductController(IPosService p,IProductService productService, ILogger<ProductController> logger) { _productService = productService; _logger = logger;
+            _pos = p;
+        }
 
         public async Task<IActionResult> Index()
         {
@@ -31,9 +34,32 @@ namespace GamblersGrocery.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product product)
         {
-            if (!ModelState.IsValid) { ViewBag.Categories = new SelectList(_productService.GetCategories()); return View("Create", product); }
-            try { await _productService.AddProductAsync(product); TempData["Success"] = $"Product '{product.productName}' added!"; return RedirectToAction(nameof(Index)); }
-            catch (Exception ex) { _logger.LogError(ex, "AddProduct failed"); ModelState.AddModelError("", "An error occurred."); ViewBag.Categories = new SelectList(_productService.GetCategories()); return View("Create", product); }
+            if (!ModelState.IsValid) { 
+                ViewBag.Categories = new SelectList(_productService.GetCategories()); 
+                return View("Create", product);
+            }
+            try {
+                var p = await _pos.ScanProductAsync(product.barcode);
+                if (p != null)
+                {
+                    if (p.barcode == product.barcode)
+                    {
+                        TempData["Error"] = "Barcode already exsist";
+                        return View("Create", product);
+                    }
+                }
+                
+                    await _productService.AddProductAsync(product);
+                    TempData["Success"] = $"Product '{product.productName}' added!";
+                    return RedirectToAction(nameof(Index));
+                
+            }
+            catch (Exception ex) { 
+                _logger.LogError(ex, "AddProduct failed"); 
+                ModelState.AddModelError("", "An error occurred."); 
+                ViewBag.Categories = new SelectList(_productService.GetCategories()); 
+                return View("Index", product); 
+            }
         }
 
         public async Task<IActionResult> Edit(int id)
