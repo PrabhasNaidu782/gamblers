@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GamblersGrocery.Migrations
 {
     /// <inheritdoc />
-    public partial class GamblersGroceryDB : Migration
+    public partial class m1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -75,6 +75,7 @@ namespace GamblersGrocery.Migrations
                     discountAmount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     finalAmount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     paymentMode = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    upiId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     transactionDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -135,7 +136,7 @@ namespace GamblersGrocery.Migrations
                     transactionId = table.Column<int>(type: "int", nullable: false),
                     productId = table.Column<int>(type: "int", nullable: false),
                     quantity = table.Column<int>(type: "int", nullable: false),
-                    unitPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    unitPrice = table.Column<decimal>(type: "decimal(10,2)", nullable: true),
                     productDiscount = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     lineTotal = table.Column<decimal>(type: "decimal(10,2)", nullable: false)
                 },

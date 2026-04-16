@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace GamblersGrocery.Controllers
 {
-    [SessionAuthorize("Admin", "Cashier")]
+    [SessionAuthorize("Cashier")]
     public class PosController : Controller
     {
         private readonly IPosService _posService;
@@ -65,6 +65,11 @@ namespace GamblersGrocery.Controllers
 
                 if (existing != null)
                 {
+                    if (existing.quantity >= product.stockQuantity)
+                    {
+                        TempData["Error"] = $"Only {product.stockQuantity} units of '{product.productName}' available in stock.";
+                        return RedirectToAction(nameof(Index));
+                    }
                     existing.quantity++;
                 }
                 else
@@ -216,11 +221,29 @@ namespace GamblersGrocery.Controllers
             {
                 var bill = GetBill();
                 var item = bill.Items.FirstOrDefault(i => i.productId == productId);
+
                 if (item != null)
                 {
-                    if (quantity <= 0) bill.Items.Remove(item);
-                    else item.quantity = quantity;
+                    if (quantity <= 0)
+                    {
+                        bill.Items.Remove(item);
+                    }
+                    else
+                    {
+                        var product = await _posService.ScanProductAsync(item.barcode);
+                        int availableStock = product?.stockQuantity ?? 0;
+
+                        if (quantity > availableStock)
+                        {
+                            TempData["Error"] = $"Cannot add {quantity} units. " + $"Only {availableStock} units of '{item.productName}' available in stock.";
+                            SaveBill(bill);
+                            return RedirectToAction(nameof(Index));
+                        }
+
+                        item.quantity = quantity;
+                    }
                 }
+
                 bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
                 SaveBill(bill);
                 return RedirectToAction(nameof(Index));
@@ -228,6 +251,7 @@ namespace GamblersGrocery.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "UpdateQty failed");
+                TempData["Error"] = "Could not update quantity.";
                 return RedirectToAction(nameof(Index));
             }
         }

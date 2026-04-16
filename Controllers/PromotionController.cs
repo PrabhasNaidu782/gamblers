@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace GamblersGrocery.Controllers
 {
     [SessionAuthorize("Admin", "Store Manager")]
+//new comment another
     public class PromotionController : Controller
     {
+        
         private readonly IPromotionService _promoService;
         private readonly IProductService _productService;
         private readonly ILogger<PromotionController> _logger;
