@@ -267,3 +267,5 @@ appsettings.Development.json
 
 Migrations/# End of .gitignore
 .vs/
+[Bb]in/
+[Oo]bj/
