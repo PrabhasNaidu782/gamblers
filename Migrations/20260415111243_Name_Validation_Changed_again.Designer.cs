@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamblersGrocery.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260406105123_AddUpiToTransaction")]
-    partial class AddUpiToTransaction
+    [Migration("20260415111243_Name_Validation_Changed_again")]
+    partial class Name_Validation_Changed_again
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,7 +83,8 @@ namespace GamblersGrocery.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal>("price")
+                    b.Property<decimal?>("price")
+                        .IsRequired()
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("productName")
@@ -252,7 +253,7 @@ namespace GamblersGrocery.Migrations
                     b.Property<int>("transactionId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("unitPrice")
+                    b.Property<decimal?>("unitPrice")
                         .HasColumnType("decimal(10,2)");
 
                     b.HasKey("itemId");

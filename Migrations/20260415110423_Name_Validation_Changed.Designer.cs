@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamblersGrocery.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260403094137_GamblersGroceryDB")]
-    partial class GamblersGroceryDB
+    [Migration("20260415110423_Name_Validation_Changed")]
+    partial class Name_Validation_Changed
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,7 +83,8 @@ namespace GamblersGrocery.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<decimal>("price")
+                    b.Property<decimal?>("price")
+                        .IsRequired()
                         .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("productName")
@@ -91,7 +92,8 @@ namespace GamblersGrocery.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("stockQuantity")
+                    b.Property<int?>("stockQuantity")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("productId");
@@ -107,7 +109,8 @@ namespace GamblersGrocery.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("promotionId"));
 
-                    b.Property<decimal>("discountPercent")
+                    b.Property<decimal?>("discountPercent")
+                        .IsRequired()
                         .HasColumnType("decimal(5,2)");
 
                     b.Property<DateTime>("endDate")
@@ -219,6 +222,9 @@ namespace GamblersGrocery.Migrations
                     b.Property<DateTime>("transactionDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("upiId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("transactionId");
 
                     b.ToTable("Transactions");
@@ -247,7 +253,7 @@ namespace GamblersGrocery.Migrations
                     b.Property<int>("transactionId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("unitPrice")
+                    b.Property<decimal?>("unitPrice")
                         .HasColumnType("decimal(10,2)");
 
                     b.HasKey("itemId");
