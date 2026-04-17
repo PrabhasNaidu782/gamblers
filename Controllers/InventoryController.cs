@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GamblersGrocery.Controllers
 {
-    [SessionAuthorize("Admin", "Store Manager", "Inventory Associate")]
+    [SessionAuthorize("Admin", "Store Manager", "Inventory Associate", "Cashier")]
     public class InventoryController : Controller
     {
         private readonly IInventoryService _inventoryService;

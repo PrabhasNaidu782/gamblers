@@ -13,7 +13,7 @@ namespace GamblersGrocery.Repositories.Implementations
 
         public async Task<IEnumerable<Settlement>> GetAllSettlementsAsync()
         {
-            try { return await _ctx.Settlements.OrderByDescending(s => s.settlementDate).ToListAsync(); }
+            try { return await _ctx.Settlements.OrderBy(s => s.settlementDate).ToListAsync(); }
             catch (Exception ex) { _logger.LogError(ex, "GetAllSettlements failed"); throw; }
         }
         public async Task<Settlement?> GetSettlementByIdAsync(int id)

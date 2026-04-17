@@ -12,7 +12,7 @@
     <div class="table-responsive">
         <table class="table mb-0">
             <thead><tr><th>Product</th><th>Barcode</th><th>Category</th><th>Price</th><th>Stock</th>
-                    @if (sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                    @if ( sessionRole == "Inventory Associate")
                     {
                         <th>Action</th>            
                     }
@@ -30,7 +30,7 @@
                             else if (p.stockQuantity <= 5) { <span class="stock-low">@p.stockQuantity (Low)</span> }
                             else { <span class="stock-ok">@p.stockQuantity</span> }
                         </td>
-                        @if (sessionRole == "Store Manager" || sessionRole == "Inventory Associate")
+                        @if ( sessionRole == "Inventory Associate")
                         {
                             <td>
                                 <a asp-action="AdjustStock" asp-route-productId="@p.productId" class="btn btn-sm btn-outline-primary">
