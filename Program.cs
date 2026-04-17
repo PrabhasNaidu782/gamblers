@@ -50,6 +50,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 if (!app.Environment.IsDevelopment())
+    //new comments
+
 {
     app.UseExceptionHandler("/Shared/Error");
     app.UseHsts();
