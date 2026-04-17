@@ -66,7 +66,8 @@ namespace GamblersGrocery.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int promotionId)
         {
-            try { await _promoService.DeletePromotionAsync(promotionId); TempData["Success"] = "Promotion deleted!"; return RedirectToAction(nameof(Index)); }
+            try { 
+                await _promoService.DeletePromotionAsync(promotionId); TempData["Success"] = "Promotion deleted!"; return RedirectToAction(nameof(Index)); }
             catch (Exception ex) { _logger.LogError(ex, "DeleteConfirmed failed"); TempData["Error"] = "Could not delete."; return RedirectToAction(nameof(Index)); }
         }
     }
