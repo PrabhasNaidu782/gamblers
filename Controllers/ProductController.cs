@@ -158,10 +158,8 @@ namespace GamblersGrocery.Controllers
             }
             catch (Exception ex)
             {
-                // We check the 'InnerException' because that's where the SQL Error 547 lives
                 if (ex.ToString().Contains("REFERENCE constraint") || ex.InnerException?.Message.Contains("REFERENCE constraint") == true)
                 {
-                    // This is the specific message for products with transactions
                     TempData["Error"] = "Cannot delete: This product has historical sales records. Try deactivating it instead.";
                 }
                 else

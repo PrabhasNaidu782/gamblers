@@ -38,10 +38,8 @@ namespace GamblersGrocery.Services.Implementations
                     var promo = await _promoRepo.GetActivePromotionForProductAsync(item.productId);
                     item.discountPercent = promo?.discountPercent ?? 0;
 
-                    // FIX 1: Added (decimal) cast and ?? 0 to unitPrice and quantity
                     item.productDiscount = Math.Round((item.unitPrice ?? 0) * (item.quantity ?? 0) * item.discountPercent / 100, 2);
 
-                    // FIX 2: Added ?? 0 for math operations
                     item.lineTotal = Math.Round(((item.unitPrice ?? 0) * (item.quantity ?? 0)) - item.productDiscount, 2);
                     sub += item.lineTotal;
                 }
@@ -85,7 +83,6 @@ namespace GamblersGrocery.Services.Implementations
                     });
 
 
-                    // FIX 5: Convert nullable int? to int for the repository method
                     await _inventoryRepo.UpdateStockAsync(item.productId, -(item.quantity ?? 0), "SALE_UPDATE");
                 }
 
@@ -101,12 +98,11 @@ namespace GamblersGrocery.Services.Implementations
             catch (Exception ex) { _logger.LogError(ex, "PosService GetTxDetails failed"); throw; }
         }
 
-        // --- ADD THIS METHOD TO FIX THE CONTROLLER ERROR ---
+        
         public async Task<IEnumerable<Product>> GetCurrentStockLevelsAsync()
         {
             try
             {
-                // This retrieves all products from the database for the search tool
                 return await _productRepo.GetAllProductsAsync();
             }
             catch (Exception ex)

@@ -21,7 +21,6 @@ namespace GamblersGrocery.Services.Implementations
             {
                 var user = await _userRepo.GetUserByEmailAsync(email);
                 if (user == null) return null;
-                // BCrypt verify - returns null if password wrong
                 bool valid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
                 return valid ? user : null;
             }
@@ -56,9 +55,7 @@ namespace GamblersGrocery.Services.Implementations
         {
             try
             {
-                // Cannot delete yourself
                 if (userId == currentUserId) return false;
-                // Cannot delete last admin
                 var user = (await _userRepo.GetAllUsersAsync())
                            .FirstOrDefault(u => u.UserId == userId);
                 if (user == null) return false;

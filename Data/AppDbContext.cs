@@ -3,14 +3,13 @@ using GamblersGrocery.Models.Entities;
 
 namespace GamblersGrocery.Data
 {
-    // Custom AppUser - stored in database, no Identity
     public class AppUser
     {
         public int UserId { get; set; }
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;  // BCrypt hash
-        public string PlainPassword { get; set; } = string.Empty; // for admin reference
+        public string PasswordHash { get; set; } = string.Empty;  
+        public string PlainPassword { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
     }
 

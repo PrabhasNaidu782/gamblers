@@ -6,7 +6,6 @@ namespace GamblersGrocery.Data
     {
         public static async Task SeedAsync(AppDbContext db)
         {
-            // Seed default Admin user if not exists
             const string adminEmail = "admin@gamblers.com";
             const string adminPassword = "Admin@123";
             const string adminName = "Store Admin";

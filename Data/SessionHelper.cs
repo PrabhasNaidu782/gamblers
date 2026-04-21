@@ -1,6 +1,5 @@
 namespace GamblersGrocery.Data
 {
-    // Keys used to store user info in session
     public static class SessionKeys
     {
         public const string UserId   = "SessionUserId";
@@ -9,7 +8,6 @@ namespace GamblersGrocery.Data
         public const string UserRole = "SessionUserRole";
     }
 
-    // Helpers to read session values
     public static class SessionHelper
     {
         public static bool IsLoggedIn(ISession session)

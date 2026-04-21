@@ -68,7 +68,7 @@ namespace GamblersGrocery.Controllers
                 {
                     int currentQty = existing.quantity ?? 0;
 
-                    // VALIDATION: Check against actual stock only
+
                     if (currentQty + 1 > product.stockQuantity)
                     {
                         TempData["Error"] = $"Cannot add more. Only {product.stockQuantity} in stock.";
@@ -79,7 +79,7 @@ namespace GamblersGrocery.Controllers
                 }
                 else
                 {
-                    // NEW ITEM: Ensure we have at least 1 in stock before adding
+
                     if (product.stockQuantity < 1)
                     {
                         TempData["Error"] = "Product is out of stock.";

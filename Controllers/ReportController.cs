@@ -68,8 +68,15 @@ namespace GamblersGrocery.Controllers
         [SessionAuthorize("Admin", "Store Manager", "Cashier")]
         public async Task<IActionResult> GetSettlementDetails(int settlementId)
         {
-            try { var s = await _reportService.GetSettlementDetailsAsync(settlementId); if (s == null) return NotFound(); return View("SettlementDetails", s); }
-            catch (Exception ex) { _logger.LogError(ex, "GetSettlementDetails failed"); TempData["Error"] = "Could not load details."; return RedirectToAction(nameof(Index)); }
+            try { var s = await _reportService.GetSettlementDetailsAsync(settlementId); 
+                if (s == null) return NotFound(); 
+                return View("SettlementDetails", s); 
+            }
+            catch (Exception ex) { 
+                _logger.LogError(ex, "GetSettlementDetails failed"); 
+                TempData["Error"] = "Could not load details."; 
+                return RedirectToAction(nameof(Index)); 
+            }
         }
     }
 }

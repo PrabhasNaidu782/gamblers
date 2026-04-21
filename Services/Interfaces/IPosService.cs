@@ -10,6 +10,5 @@ namespace GamblersGrocery.Services.Interfaces
         Task<Transaction?> GetTransactionDetailsAsync(int id);
         Task<IEnumerable<Product>> GetCurrentStockLevelsAsync();
 
-        //Task CompleteSaleAsync(BillViewModel bill, int cashierId, string cashierName, string paymentMode, string upiId);
     }
 }
