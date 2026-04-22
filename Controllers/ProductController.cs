@@ -38,10 +38,14 @@ namespace GamblersGrocery.Controllers
         {
             try
             {
-                var p = await _productService.GetProductDetailsAsync(id);
-                if (p == null) return NotFound();
+                var product = await _productService.GetProductDetailsAsync(id);
 
-                return View("Details", p);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                return View("Details", product);
             }
             catch (Exception ex)
             {
@@ -88,11 +92,15 @@ namespace GamblersGrocery.Controllers
         {
             try
             {
-                var p = await _productService.GetProductDetailsAsync(id);
-                if (p == null) return NotFound();
+                var product = await _productService.GetProductDetailsAsync(id);
 
-                ViewBag.Categories = new SelectList(_productService.GetCategories(), p.category);
-                return View(p);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                ViewBag.Categories = new SelectList(_productService.GetCategories(), product.category);
+                return View(product);
             }
             catch (Exception ex)
             {
@@ -132,10 +140,14 @@ namespace GamblersGrocery.Controllers
         {
             try
             {
-                var p = await _productService.GetProductDetailsAsync(id);
-                if (p == null) return NotFound();
+                var product = await _productService.GetProductDetailsAsync(id);
 
-                return View(p);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                return View(product);
             }
             catch (Exception ex)
             {
@@ -147,7 +159,6 @@ namespace GamblersGrocery.Controllers
 
         [HttpPost]
         [SessionAuthorize("Store Manager")]
-    
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int productId)
         {
@@ -158,7 +169,8 @@ namespace GamblersGrocery.Controllers
             }
             catch (Exception ex)
             {
-                if (ex.ToString().Contains("REFERENCE constraint") || ex.InnerException?.Message.Contains("REFERENCE constraint") == true)
+                if (ex.ToString().Contains("REFERENCE constraint") ||
+                    ex.InnerException?.Message.Contains("REFERENCE constraint") == true)
                 {
                     TempData["Error"] = "Cannot delete: This product has historical sales records. Try deactivating it instead.";
                 }
@@ -172,6 +184,7 @@ namespace GamblersGrocery.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
         [SessionAuthorize("Admin", "Store Manager")]
         public async Task<IActionResult> ListAllProducts()
         {

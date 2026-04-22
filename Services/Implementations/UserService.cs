@@ -20,24 +20,43 @@ namespace GamblersGrocery.Services.Implementations
             try
             {
                 var user = await _userRepo.GetUserByEmailAsync(email);
-                if (user == null) return null;
+                if (user == null)
+                {
+                    return null;
+                }
+
                 bool valid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
                 return valid ? user : null;
             }
-            catch (Exception ex) { _logger.LogError(ex, "ValidateLogin failed"); throw; }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ValidateLogin failed");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<AppUser>> GetAllUsersAsync()
         {
-            try { return await _userRepo.GetAllUsersAsync(); }
-            catch (Exception ex) { _logger.LogError(ex, "GetAllUsers failed"); throw; }
+            try
+            {
+                return await _userRepo.GetAllUsersAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllUsers failed");
+                throw;
+            }
         }
 
         public async Task<bool> CreateUserAsync(string fullName, string email, string password, string role)
         {
             try
             {
-                if (await _userRepo.EmailExistsAsync(email)) return false;
+                if (await _userRepo.EmailExistsAsync(email))
+                {
+                    return false;
+                }
+
                 await _userRepo.AddUserAsync(new AppUser
                 {
                     FullName = fullName,
@@ -46,25 +65,46 @@ namespace GamblersGrocery.Services.Implementations
                     PlainPassword = password,
                     Role = role
                 });
+
                 return true;
             }
-            catch (Exception ex) { _logger.LogError(ex, "CreateUser failed"); throw; }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateUser failed");
+                throw;
+            }
         }
 
         public async Task<bool> DeleteUserAsync(int userId, int currentUserId)
         {
             try
             {
-                if (userId == currentUserId) return false;
+                if (userId == currentUserId)
+                {
+                    return false;
+                }
+
                 var user = (await _userRepo.GetAllUsersAsync())
                            .FirstOrDefault(u => u.UserId == userId);
-                if (user == null) return false;
-                if (user.Role == "Admin" && await _userRepo.CountAdminsAsync() <= 1)
+
+                if (user == null)
+                {
                     return false;
+                }
+
+                if (user.Role == "Admin" && await _userRepo.CountAdminsAsync() <= 1)
+                {
+                    return false;
+                }
+
                 await _userRepo.DeleteUserAsync(userId);
                 return true;
             }
-            catch (Exception ex) { _logger.LogError(ex, "DeleteUser failed"); throw; }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteUser failed");
+                throw;
+            }
         }
     }
 }

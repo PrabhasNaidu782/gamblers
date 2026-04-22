@@ -3,12 +3,8 @@ using GamblersGrocery.Data;
 using GamblersGrocery.Filters;
 using GamblersGrocery.Models.Entities;
 using GamblersGrocery.Models.ViewModels;
-using GamblersGrocery.Repositories.Implementations;
-using GamblersGrocery.Repositories.Interfaces;
-using GamblersGrocery.Services.Implementations;
 using GamblersGrocery.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GamblersGrocery.Controllers
 {
@@ -21,7 +17,10 @@ namespace GamblersGrocery.Controllers
         private readonly ILogger<PosController> _logger;
         private readonly IProductService _productService;
 
-        public PosController(IPosService posService, IProductService productService, ILogger<PosController> logger)
+        public PosController(
+            IPosService posService,
+            IProductService productService,
+            ILogger<PosController> logger)
         {
             _posService = posService;
             _productService = productService;
@@ -55,6 +54,7 @@ namespace GamblersGrocery.Controllers
             try
             {
                 var product = await _posService.ScanProductAsync(barcode.Trim());
+
                 if (product == null)
                 {
                     TempData["Error"] = "Product not found.";
@@ -68,7 +68,6 @@ namespace GamblersGrocery.Controllers
                 {
                     int currentQty = existing.quantity ?? 0;
 
-
                     if (currentQty + 1 > product.stockQuantity)
                     {
                         TempData["Error"] = $"Cannot add more. Only {product.stockQuantity} in stock.";
@@ -79,7 +78,6 @@ namespace GamblersGrocery.Controllers
                 }
                 else
                 {
-
                     if (product.stockQuantity < 1)
                     {
                         TempData["Error"] = "Product is out of stock.";
@@ -112,7 +110,6 @@ namespace GamblersGrocery.Controllers
         }
 
         [HttpPost]
-        [HttpPost]
         public async Task<IActionResult> UpdateQty(int productId, int? quantity)
         {
             var bill = GetBill();
@@ -123,11 +120,8 @@ namespace GamblersGrocery.Controllers
             {
                 if (quantity > product.stockQuantity)
                 {
-                    
                     item.quantity = product.stockQuantity;
-
-                    
-                    TempData["Error"] = $"Max quantity for  {product.productName} is in stock ({product.stockQuantity}).";
+                    TempData["Error"] = $"Max quantity for {product.productName} is in stock ({product.stockQuantity}).";
                 }
                 else if (quantity < 1)
                 {
@@ -142,9 +136,9 @@ namespace GamblersGrocery.Controllers
             bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
             SaveBill(bill);
 
-            
             return RedirectToAction(nameof(Index));
         }
+
         [HttpPost]
         public async Task<IActionResult> ApplyDiscount(decimal discountPercent)
         {
@@ -167,6 +161,7 @@ namespace GamblersGrocery.Controllers
         public async Task<IActionResult> ProcessPayment(string paymentMode)
         {
             var bill = GetBill();
+
             if (!bill.Items.Any())
             {
                 TempData["Error"] = "Bill is empty.";
@@ -185,7 +180,11 @@ namespace GamblersGrocery.Controllers
         public IActionResult PaymentGateway(string mode)
         {
             var bill = GetBill();
-            if (!bill.Items.Any()) return RedirectToAction(nameof(Index));
+
+            if (!bill.Items.Any())
+            {
+                return RedirectToAction(nameof(Index));
+            }
 
             ViewBag.PaymentMode = mode;
             return View("PaymentGateway", bill);
@@ -195,6 +194,7 @@ namespace GamblersGrocery.Controllers
         public async Task<IActionResult> CompleteSale(string paymentMode, string? upiId)
         {
             var bill = GetBill();
+
             if (!bill.Items.Any())
             {
                 TempData["Error"] = "Bill is empty.";
@@ -230,7 +230,12 @@ namespace GamblersGrocery.Controllers
             try
             {
                 var tx = await _posService.GetTransactionDetailsAsync(transactionId);
-                if (tx == null) return NotFound();
+
+                if (tx == null)
+                {
+                    return NotFound();
+                }
+
                 return View("TransactionDetails", tx);
             }
             catch (Exception ex)
@@ -247,8 +252,10 @@ namespace GamblersGrocery.Controllers
             {
                 var bill = GetBill();
                 bill.Items.RemoveAll(i => i.productId == productId);
+
                 bill = await _posService.ApplyDiscountAsync(bill, bill.billDiscountPercent);
                 SaveBill(bill);
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -268,7 +275,12 @@ namespace GamblersGrocery.Controllers
         private BillViewModel GetBill()
         {
             var json = HttpContext.Session.GetString(BillKey);
-            if (string.IsNullOrEmpty(json)) return new BillViewModel();
+
+            if (string.IsNullOrEmpty(json))
+            {
+                return new BillViewModel();
+            }
+
             try
             {
                 return JsonSerializer.Deserialize<BillViewModel>(json) ?? new BillViewModel();
@@ -280,6 +292,8 @@ namespace GamblersGrocery.Controllers
         }
 
         private void SaveBill(BillViewModel bill)
-            => HttpContext.Session.SetString(BillKey, JsonSerializer.Serialize(bill));
+        {
+            HttpContext.Session.SetString(BillKey, JsonSerializer.Serialize(bill));
+        }
     }
 }

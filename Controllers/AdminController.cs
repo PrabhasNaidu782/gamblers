@@ -28,7 +28,8 @@ namespace GamblersGrocery.Controllers
         {
             try
             {
-                return View(await _reportService.GetAdminDashboardDataAsync());
+                var dashboardData = await _reportService.GetAdminDashboardDataAsync();
+                return View(dashboardData);
             }
             catch (Exception ex)
             {
@@ -55,17 +56,27 @@ namespace GamblersGrocery.Controllers
         }
 
         // GET: /Admin/CreateUser
-        public IActionResult CreateUser() => View(new RegisterViewModel());
+        public IActionResult CreateUser()
+        {
+            return View(new RegisterViewModel());
+        }
 
         // POST: /Admin/CreateUser
         [HttpPost]
         public async Task<IActionResult> CreateUser(RegisterViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
             try
             {
                 bool created = await _userService.CreateUserAsync(
-                    vm.FullName, vm.Email, vm.Password, vm.Role);
+                    vm.FullName,
+                    vm.Email,
+                    vm.Password,
+                    vm.Role);
 
                 if (!created)
                 {
