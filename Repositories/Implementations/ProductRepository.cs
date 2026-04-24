@@ -1,6 +1,9 @@
 using GamblersGrocery.Data;
 using GamblersGrocery.Models.Entities;
 using GamblersGrocery.Repositories.Interfaces;
+using GamblersGrocery.Services.Implementations;
+using GamblersGrocery.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GamblersGrocery.Repositories.Implementations
@@ -9,9 +12,11 @@ namespace GamblersGrocery.Repositories.Implementations
     {
         private readonly AppDbContext _ctx;
         private readonly ILogger<ProductRepository> _logger;
+        
 
         public ProductRepository(AppDbContext ctx, ILogger<ProductRepository> logger)
         {
+           
             _ctx = ctx;
             _logger = logger;
         }
@@ -62,8 +67,11 @@ namespace GamblersGrocery.Repositories.Implementations
         {
             try
             {
-                _ctx.Products.Add(product);
-                await _ctx.SaveChangesAsync();
+                
+                
+                    _ctx.Products.Add(product);
+                    await _ctx.SaveChangesAsync();
+                
             }
             catch (Exception ex)
             {

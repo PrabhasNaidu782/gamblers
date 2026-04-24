@@ -1,9 +1,12 @@
 using GamblersGrocery.Data;
-using GamblersGrocery.Repositories.Interfaces;
 using GamblersGrocery.Repositories.Implementations;
-using GamblersGrocery.Services.Interfaces;
+using GamblersGrocery.Repositories.Interfaces;
 using GamblersGrocery.Services.Implementations;
+using GamblersGrocery.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using static GamblersGrocery.Data.AppDbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 

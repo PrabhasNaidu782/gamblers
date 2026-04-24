@@ -414,3 +414,7 @@ C:\Users\2475889\source\repos\Gamblers\gamblers\obj\Debug\net8.0\refint\Gamblers
 C:\Users\2475889\source\repos\Gamblers\gamblers\obj\Debug\net8.0\GamblersGrocery.pdb
 C:\Users\2475889\source\repos\Gamblers\gamblers\obj\Debug\net8.0\GamblersGrocery.genruntimeconfig.cache
 C:\Users\2475889\source\repos\Gamblers\gamblers\obj\Debug\net8.0\ref\GamblersGrocery.dll
+C:\Users\2475889\source\repos\Gamblers\gamblers\bin\Debug\net8.0\FluentValidation.dll
+C:\Users\2475889\source\repos\Gamblers\gamblers\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
+C:\Users\2475889\source\repos\Gamblers\gamblers\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
+C:\Users\2475889\source\repos\Gamblers\gamblers\obj\Debug\net8.0\GamblersGrocery.MvcApplicationPartsAssemblyInfo.cs

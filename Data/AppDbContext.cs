@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using GamblersGrocery.Models.Entities;
+using System.ComponentModel.DataAnnotations;
+using System.IO.Compression;
+using FluentValidation;
 
 namespace GamblersGrocery.Data
 {
@@ -7,6 +10,7 @@ namespace GamblersGrocery.Data
     {
         public int UserId { get; set; }
         public string FullName { get; set; } = string.Empty;
+        
         public string Email { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;  
         public string PlainPassword { get; set; } = string.Empty;

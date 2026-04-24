@@ -10,9 +10,10 @@ namespace GamblersGrocery.Controllers
     {
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
-
-        public ProductController(IProductService productService, ILogger<ProductController> logger)
+        private readonly IPosService _pos;
+        public ProductController(IProductService productService, ILogger<ProductController> logger,IPosService pos)
         {
+            _pos = pos;
             _productService = productService;
             _logger = logger;
         }
@@ -74,9 +75,17 @@ namespace GamblersGrocery.Controllers
 
             try
             {
-                await _productService.AddProductAsync(product);
-                TempData["Success"] = $"Product '{product.productName}' added!";
-                return RedirectToAction(nameof(Index));
+                Product p = await _pos.ScanProductAsync(product.barcode);
+                if (p!=null && p.barcode == product.barcode)
+                {
+                    TempData["Error"] = "Barcode already exist";
+                    return RedirectToAction(nameof(Create));
+                }
+                else {
+                    await _productService.AddProductAsync(product);
+                    TempData["Success"] = $"Product '{product.productName}' added!";
+                    return RedirectToAction(nameof(Index));
+                }
             }
             catch (Exception ex)
             {

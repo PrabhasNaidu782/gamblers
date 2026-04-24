@@ -17,6 +17,7 @@ namespace GamblersGrocery.Models.ViewModels
     public class RegisterViewModel
     {
         [Required(ErrorMessage = "Full name is required")]
+        //[RegularExpression(@"^[a-zA_Z]",ErrorMessage ="Please Enter Valid User Name")]
         [Display(Name = "Full Name")]
         [StringLength(100, MinimumLength = 2)]
         public string FullName { get; set; } = string.Empty;
