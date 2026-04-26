@@ -78,7 +78,6 @@
             const $category = $('#categoryFilter');
             const $hiddenId = $('#selectedProductId');
 
-            // Show results when typing
             $search.on('input', function () {
                 const query = $(this).val().toLowerCase();
                 const selectedCat = $category.val();
@@ -93,7 +92,6 @@
                     const name = $(this).data('name').toLowerCase();
                     const cat = $(this).data('category');
                     
-                    // Match query AND match category (if category is selected)
                     const matchesQuery = name.includes(query);
                     const matchesCat = !selectedCat || cat === selectedCat;
 
@@ -108,24 +106,21 @@
                 foundCount > 0 ? $results.show() : $results.hide();
             });
 
-            // Handle clicking a result
             $(document).on('click', '.product-option', function () {
                 const id = $(this).data('id');
                 const name = $(this).data('name');
 
-                $search.val(name);           // Put name in visible box
-                $hiddenId.val(id);           // Put ID in hidden box for database
-                $results.hide();             // Hide results
+                $search.val(name);           
+                $hiddenId.val(id);          
+                $results.hide();            
             });
 
-            // Close results if clicking outside
             $(document).on('click', function (e) {
                 if (!$(e.target).closest('.mb-3').length) {
                     $results.hide();
                 }
             });
 
-            // Reset search if category changes
             $category.on('change', function() {
                 $search.val('');
                 $hiddenId.val('');
@@ -135,7 +130,6 @@
     </script>
 
     <style>
-        /* Make the search results look like a real dropdown */
         #searchResults {
             top: 100%;
             left: 0;

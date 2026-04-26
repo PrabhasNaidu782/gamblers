@@ -24,22 +24,38 @@
                 @foreach (var p in Model)
                 {
                     var today = DateTime.Today;
-                    var active = p.startDate <= today && p.endDate >= today;
+                    bool active = p.startDate <= today && p.endDate >= today;
+                    bool upcoming = p.startDate > today;
+
                     <tr>
                         <td><strong>@p.Product?.productName</strong></td>
                         <td><span class="badge badge-warning">@p.discountPercent% OFF</span></td>
                         <td>@p.startDate.ToString("dd MMM yyyy")</td>
                         <td>@p.endDate.ToString("dd MMM yyyy")</td>
-                        <td>@if (active) { <span class="badge badge-success">Active</span> } else { <span class="badge" style="background:#e2e8f0;color:#555;">Inactive</span> }</td>
-                    @if (sessionRole == "Store Manager")
-                    {
                         <td>
-                            <a asp-action="Edit" asp-route-id="@p.promotionId" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
-                            <a asp-action="Delete" asp-route-id="@p.promotionId" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                            @if (active)
+                            {
+                                <span class="badge badge-success">Active</span>
+                            }
+                            else if (upcoming)
+                            {
+                                <span class="badge badge-info">Upcoming</span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:#e2e8f0;color:#555;">Expired</span>
+                            }
                         </td>
-                    }
+                        @if (sessionRole == "Store Manager")
+                        {
+                            <td>
+                                <a asp-action="Edit" asp-route-id="@p.promotionId" class="btn btn-sm btn-outline-primary me-1"><i class="fas fa-edit"></i></a>
+                                <a asp-action="Delete" asp-route-id="@p.promotionId" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                            </td>
+                        }
                     </tr>
                 }
+
             </tbody>
         </table>
     </div>
